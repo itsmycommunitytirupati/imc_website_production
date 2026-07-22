@@ -19,9 +19,10 @@ interface CommunityJoinModalProps {
     isOpen: boolean;
     onClose: () => void;
     onNavigateTerms?: () => void;
+    submissionType?: string;
 }
 
-export default function CommunityJoinModal({ isOpen, onClose, onNavigateTerms }: CommunityJoinModalProps) {
+export default function CommunityJoinModal({ isOpen, onClose, onNavigateTerms, submissionType }: CommunityJoinModalProps) {
     const [modalStep, setModalStep] = useState<"terms" | "details" | "submitting" | "success">("terms");
     const [agreed, setAgreed] = useState(false);
     const [formData, setFormData] = useState({ name: "", email: "", contact: "", profession: "" });
@@ -75,6 +76,9 @@ export default function CommunityJoinModal({ isOpen, onClose, onNavigateTerms }:
             payload.append("email", formData.email);
             payload.append("contact", formData.contact);
             payload.append("profession", formData.profession);
+            if (submissionType) {
+                payload.append("submissionType", submissionType);
+            }
             payload.append("source", "imc-website");
             payload.append("submittedAt", now.toISOString());
             payload.append(

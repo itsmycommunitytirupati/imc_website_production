@@ -164,6 +164,7 @@ export default function JoinTeamPage({
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}
                 onNavigateTerms={() => onNavigate?.("terms")}
+                submissionType="member"
             />
         </div>
     );

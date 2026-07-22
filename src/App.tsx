@@ -18,6 +18,8 @@ import AboutPage from "./components/AboutusPage";
 import LegalPage from "./components/LegalPage";
 
 import JoinTeamPage from './components/joinTeam'
+import MaintenancePage from "./components/Maintenance";
+import { IS_MAINTENANCE } from "./config/Maintenance";
 
 // Define the available views for the App
 type AppView = "home" | "gallery" | "about" | "terms" | "privacy" | "guidelines" | "team";
@@ -88,7 +90,7 @@ export default function App() {
     const canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
     if (canonicalLink) {
       const path = view === "home" ? "/" : `/${view}`;
-      canonicalLink.href = `https://imctirupati.org${path}`;
+      canonicalLink.href = `https://imctirupati.com${path}`;
     }
   }, [view]);
 
@@ -178,6 +180,10 @@ export default function App() {
   /* ------------------------------------------------------------------ */
   /*  5. RENDER LOGIC                                                   */
   /* ------------------------------------------------------------------ */
+  if (IS_MAINTENANCE) {
+    return <MaintenancePage />;
+  }
+
   return (
     <div className="bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-900 dark:text-slate-100 font-sans selection:bg-orange-500 selection:text-white transition-colors duration-300">
       <FloatingWhatsApp />

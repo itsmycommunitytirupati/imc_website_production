@@ -65,12 +65,12 @@ export const WINGS_DATA: Wing[] = [
       {
         title: "Heritage Food Walks",
         description: "Exploring authentic local eateries and learning the history behind traditional recipes and temple-town cuisines.",
-        frequency: "Monthly"
+        frequency: "Weekly"
       },
       {
         title: "Local Artisan Workshops",
         description: "Hands-on sessions with local craftsmen to learn pottery, weaving, and the traditional arts of the Rayalaseema region.",
-        frequency: "Quarterly"
+        frequency: "Weekly"
       }
     ],
     team: [{ name: "Rajesh Iyer", role: "Heritage Curator" }],
@@ -90,12 +90,12 @@ export const WINGS_DATA: Wing[] = [
       {
         title: "Professional Mixers",
         description: "Structured networking events designed to connect freelancers, recruiters, and corporate professionals.",
-        frequency: "Monthly"
+        frequency: "Weekly"
       },
       {
         title: "Talent Spotlight",
         description: "Monthly digital features of local talent followed by offline interview-prep and referral circles.",
-        frequency: "Ongoing"
+        frequency: "Weekly"
       }
     ],
     team: [{ name: "Priya Sharma", role: "Networking Director" }],
@@ -115,12 +115,12 @@ export const WINGS_DATA: Wing[] = [
       {
         title: "Green Tirupati Preservation",
         description: "Dedicated morning tree plantations and waste segregation awareness booths around water reservoirs.",
-        frequency: "Monthly"
+        frequency: "Weekly"
       },
       {
         title: "Kindness Kitchen",
         description: "Collaborative project serving home-cooked weekend meals to the homeless and those in need.",
-        frequency: "Every Sunday"
+        frequency: "Weekly"
       }
     ],
     team: [{ name: "Dr. Amit Prasad", role: "Director of Social Welfare" }],
@@ -140,12 +140,12 @@ export const WINGS_DATA: Wing[] = [
       // {
       //   title: "Forest Bathing",
       //   description: "Guided silent walks through the hill trails for mental rejuvenation and stress relief.",
-      //   frequency: "Bi-weekly"
+      //   frequency: "Weekly"
       // },
       // {
       //   title: "Eco-Camping",
       //   description: "Overnight stays in sustainable camps with star-gazing sessions and bonfire stories.",
-      //   frequency: "Seasonal"
+      //   frequency: "Weekly"
       // }
     ],
     team: [{ name: "Varun Teja", role: "Expedition Guide" }],
@@ -185,7 +185,7 @@ export const WINGS_DATA: Wing[] = [
       {
         title: "Turf Wars",
         description: "Weekend box cricket and football tournaments for all skill levels.",
-        frequency: "Every Sunday"
+        frequency: "Weekly"
       }
     ],
     team: [{ name: "Kiran Dev", role: "Sports Coordinator" }],
@@ -205,7 +205,7 @@ export const WINGS_DATA: Wing[] = [
       {
         title: "Pitch Perfect Sessions",
         description: "Mock pitching to investors followed by detailed peer review and business modeling.",
-        frequency: "Monthly"
+        frequency: "Weekly"
       }
     ],
     team: [{ name: "Sandeep Rao", role: "Startup Mentor" }],
@@ -245,7 +245,7 @@ export const WINGS_DATA: Wing[] = [
       {
         title: "Empowerment Circles",
         description: "Monthly discussions on personal finance, health, and leadership.",
-        frequency: "Monthly"
+        frequency: "Weekly"
       }
     ],
     team: [{ name: "Ananya Reddy", role: "Community Lead" }],
@@ -285,7 +285,7 @@ export const WINGS_DATA: Wing[] = [
       {
         title: "Photowalks",
         description: "Capturing the cinematic side of Tirupati's streets and architecture.",
-        frequency: "Monthly"
+        frequency: "Weekly"
       }
     ],
     team: [{ name: "Siddharth Roy", role: "Creative Director" }],
