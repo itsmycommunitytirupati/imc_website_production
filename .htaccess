@@ -1,0 +1,30 @@
+# Apache config for a Vite/React-style single-page app
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  Options -MultiViews
+
+  # Serve existing files and directories directly
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Fallback to index.html for SPA routes
+  RewriteRule ^ /index.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  # Cache static assets aggressively
+  <FilesMatch "\.(css|js|png|jpg|jpeg|gif|svg|webp|avif|ico|woff2?|ttf|eot|map)$">
+    Header set Cache-Control "max-age=31536000, public, immutable"
+  </FilesMatch>
+
+  # Avoid caching HTML and JSON aggressively
+  <FilesMatch "\.(html|json)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/plain text/html text/xml text/css application/javascript application/json application/xml application/rss+xml application/atom+xml font/truetype font/opentype image/svg+xml
+</IfModule>

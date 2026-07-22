@@ -1,0 +1,6 @@
+{
+  "name": "IMC Tirupati",
+  "description": "The official digital platform for IMC Tirupati community-driven clubs, wings, activities, and events.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
