@@ -7,6 +7,7 @@ import {
 } from "framer-motion";
 import { Quote, Star, MessageSquare, ArrowRight } from "lucide-react";
 import { TESTIMONIALS } from "../data";
+
 // Color Palette for variety
 const CARD_THEMES = [
   { border: "hover:border-orange-500/50", accent: "text-orange-500", bg: "bg-orange-500/10", lightText: "text-orange-600 dark:text-orange-300", glow: "from-orange-500/20" },
