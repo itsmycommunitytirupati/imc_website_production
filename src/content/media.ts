@@ -1,7 +1,4 @@
-import imcCircle from "../../assets/about1.jpeg";
-import imcNature from "../../assets/about2.jpeg";
-import imcArt from "../../assets/about3.jpeg";
-import imcCrowd from "../../assets/10.jpeg";
+import { photo } from "./photos";
 
 // Unsplash photos are hotlinked, as the Unsplash License allows.
 // Swap any of these for IMC's own photos as they come in; a real shoot of a
@@ -31,8 +28,8 @@ export const MEDIA = {
   guitar: unsplash("photo-1791326457073-2fcd8ff789b7"),
   sketching: unsplash("photo-1757085242652-f8cd4d3de889"),
   // Real IMC moments.
-  imcCircle, // book club around a long table
-  imcNature, // Nature Retreat outing
-  imcArt, // Art & Craft Club
-  imcCrowd, // big group shot after a dance session
+  imcCircle: photo("about1"), // book club around a long table
+  imcNature: photo("about2"), // Nature Retreat outing
+  imcArt: photo("about3"), // Art & Craft Club
+  imcCrowd: photo(10), // big group shot after a dance session
 };

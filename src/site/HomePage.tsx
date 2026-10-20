@@ -1,15 +1,16 @@
 import { useState, type ComponentType, type FormEvent } from "react";
 import {
-  ArrowRight, ArrowUpRight, Baby, Bus, CalendarDays, CalendarRange, Check, ChevronRight, Footprints, Globe,
-  HeartHandshake, MapPin, MapPinned, MessageCircle, Search, Sparkles, Sun, User, Users, UtensilsCrossed,
+  ArrowRight, ArrowUpRight, Baby, Bus, CalendarRange, Check, ChevronRight, Footprints, Globe,
+  HeartHandshake, MapPin, MapPinned, MessageCircle, Search, Sparkles, Sun, Users, UtensilsCrossed,
 } from "lucide-react";
 import { Link, navigate } from "../lib/router";
 import { CONTACT, LANGS, OFFICIAL, guideUrl, useLang, usePageTitle } from "../lib/site";
 import { MEDIA } from "../content/media";
-import { answerFor, followUpPrompt } from "../content/guide";
+import { IMC_PHOTOS } from "../content/photos";
 import { BEFORE_YOU_GO, DISTANCES, TRIP_TYPES, type TopicId } from "../content/visitor";
 import { GopuramIcon } from "./ui";
 import Reveal from "./Reveal";
+import ChatPreview from "./ChatPreview";
 
 type IconType = ComponentType<{ className?: string; strokeWidth?: number }>;
 
@@ -32,9 +33,9 @@ const TRIP_ICONS: Record<(typeof TRIP_TYPES)[number]["id"], IconType> = {
 };
 
 const COMMUNITY_CARDS = [
-  { title: "Music & meetups", text: "Live music, jam sessions and friendly gatherings.", image: MEDIA.imcCrowd, to: "/experiences?c=music" },
-  { title: "Nature outings", text: "Treks, nature walks and weekend getaways.", image: MEDIA.imcNature, to: "/experiences?c=nature" },
-  { title: "Culture & creativity", text: "Local art, traditions, food and more.", image: MEDIA.imcArt, to: "/experiences?c=culture" },
+  { title: "Music & meetups", text: "Live music, jam sessions and friendly gatherings.", image: IMC_PHOTOS.danceCrowd, to: "/experiences?c=music" },
+  { title: "Nature outings", text: "Treks, nature walks and weekend getaways.", image: IMC_PHOTOS.hilltop, to: "/experiences?c=nature" },
+  { title: "Culture & creativity", text: "Local art, traditions, food and more.", image: IMC_PHOTOS.classicalDance, to: "/experiences?c=culture" },
 ];
 
 export default function HomePage() {
@@ -52,7 +53,7 @@ export default function HomePage() {
           <Reveal>
             <h2 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">Helpful answers. Clear next steps.</h2>
             <div className="mt-6 grid gap-8 md:grid-cols-2 md:gap-5">
-              <ExampleConversation />
+              <ChatPreview />
               <MakeItYourVisit />
             </div>
           </Reveal>
@@ -219,53 +220,6 @@ function TripTypes() {
         </div>
       </Reveal>
     </section>
-  );
-}
-
-function ExampleConversation() {
-  const [lang] = useLang();
-  const question = "We're travelling with elderly parents.";
-  const a = answerFor(question);
-  return (
-    <div className="rounded-2xl border border-line bg-white p-4 shadow-sm">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">Example conversation</p>
-      <div className="mt-4 flex items-center gap-3">
-        <span className="grid h-8 w-8 place-items-center rounded-full bg-brand-soft text-brand"><User className="h-4 w-4" /></span>
-        <p className="rounded-lg bg-brand-soft px-3 py-2 text-sm">{question}</p>
-      </div>
-      <div className="mt-4 flex gap-3">
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-peach text-[10px] font-extrabold">IMC</span>
-        <div className="flex-1 rounded-lg bg-stone-50 p-3">
-          <p className="font-medium">{a.title}</p>
-          <ul className="mt-2 space-y-1.5 text-sm text-muted">
-            {a.points.map((p) => (
-              <li key={p} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-brand" />{p}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
-      {a.followUps && (
-        <div className="mt-3 rounded-lg bg-stone-50 p-3">
-          <p className="text-sm">{a.ask}</p>
-          <div className="mt-2 grid grid-cols-2 gap-2">
-            {a.followUps.map((f) => {
-              const { label, prompt } = followUpPrompt(f);
-              const Icon = f === "transport" ? Bus : CalendarDays;
-              return (
-                <Link key={f} to={guideUrl(prompt, lang)} className="flex items-center justify-center gap-2 rounded-lg border border-brand/30 bg-white py-2.5 text-sm font-medium text-brand transition hover:bg-brand-soft">
-                  <Icon className="h-4 w-4" /> {label}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      )}
-      {a.officialLink && (
-        <a href={a.officialLink.url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-brand underline underline-offset-4">
-          {a.officialLink.label} <ArrowUpRight className="h-3.5 w-3.5" />
-        </a>
-      )}
-    </div>
   );
 }
 

@@ -1,9 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Caveat:wght@600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Plus Jakarta Sans", "Inter", ui-sans-serif, sans-serif;
+  --font-hand: "Caveat", "Comic Sans MS", cursive;
 
   /* IMC visitor-first palette: saffron brand on warm cream. */
   --color-brand: #c2410c;
@@ -14,6 +15,8 @@
   --color-ink: #141414;
   --color-muted: #5f5a54;
   --color-line: #ece2d8;
+  --color-paper: #f4f3ef;
+  --color-turmeric: #ffd84d;
 }
 
 @utility scrollbar-none {
@@ -47,4 +50,19 @@ a,
 :focus-visible {
   outline: 2px solid var(--color-brand);
   outline-offset: 2px;
+}
+
+/* Community page motion. Off for people who prefer reduced motion. */
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes wall-up { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+@keyframes wall-down { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+@keyframes float { 0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); } 50% { transform: translateY(-10px) rotate(var(--r, 0deg)); } }
+.animate-marquee { animation: marquee 45s linear infinite; }
+.animate-marquee-slow { animation: marquee 80s linear infinite; }
+.animate-wall-up { animation: wall-up 70s linear infinite; }
+.animate-wall-down { animation: wall-down 70s linear infinite; }
+.animate-float { animation: float 7s ease-in-out infinite; }
+.hover-pause:hover .animate-marquee-slow { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee, .animate-marquee-slow, .animate-wall-up, .animate-wall-down, .animate-float { animation: none; }
 }

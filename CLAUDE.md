@@ -71,7 +71,9 @@ src/
     visitor.ts         visitor guide topics
     experiences.ts     sample experiences (fictitious) + categories
     guide.ts           curated guide answers + keyword matcher (grounding notes for the future AI)
-    media.ts           photos (Unsplash hotlinks + IMC's own assets/)
+    media.ts           stock photos (Unsplash hotlinks) + a few IMC photos
+    photos.ts          IMC's own event photos (assets/photos/*.webp), named by what they show
+    community.ts       club circles, get-involved cards, FAQs, poster colours
   site/                main site pages; ui.tsx = Logo, GopuramIcon, Header, Footer, MobileTabBar
   guide/GuideApp.tsx   chat UI; reads ?q= and ?lang= from the home search
   admin/AdminApp.tsx   dashboard shell with sample data
@@ -105,8 +107,17 @@ src/
 - Type: **Plus Jakarta Sans** extra-bold for headings (`font-display`), **Inter** for body text.
 - Light theme only. Rounded-xl cards with a 1px `line` border and a soft shadow; brand-coloured
   icons (lucide-react, plus `GopuramIcon` for temple topics).
-- Community page voice is bolder and more playful (dot grid, black pills, sticker tags) for the
-  youth audience. Visitor pages stay calm and practical.
+- Community page (`site/CommunityPage.tsx`) follows communitie.in's richness with IMC's own
+  content: dotted hero with a turmeric marker highlight and floating polaroids, a "Coming up"
+  ticker, a scrolling photo wall behind "Welcome to IMC.", photo cards for the eight club circles
+  (hover or tap to join), fanned event posters, a WhatsApp phone mock-up, tilted "Your passion"
+  polaroids with handwritten notes (`font-hand`, Caveat), Instagram-style posts, a testimonial
+  marquee, FAQs and a saffron "See you this Sunday?" close. Telugu touches ("రండి! Randi") are
+  welcome. Visitor pages stay calm and practical.
+- The home page's example conversation is `site/ChatPreview.tsx`: a chat window that plays the
+  exchange on scroll, and whose input opens the real guide.
+- Photos: put originals in `assets/`, run `node scripts/optimize-photos.mjs`, and use the WebP
+  copies via `content/photos.ts`. Never ship the 2 MB originals to a page.
 - Motion: wrap sections in `site/Reveal.tsx` (fade-up on scroll; respects reduced motion). Cards
   lift slightly on hover. Keep it subtle.
 - Photos must match their subject: real IMC photos for clubs (`imcNature`, `imcArt`, `imcCircle`,

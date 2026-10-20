@@ -1,4 +1,5 @@
 import { MEDIA } from "./media";
+import { IMC_PHOTOS } from "./photos";
 
 // Sample experiences. The names, venues and dates are fictitious placeholders
 // written in a Tirupati voice; replace them from the admin once the events
@@ -54,7 +55,7 @@ export const EXPERIENCES: Experience[] = [
     price: "Free",
     recurring: "Every Sunday",
     blurb: "A friendly 5K at the foot of the hills, all paces welcome, idli and chai after.",
-    image: MEDIA.townView,
+    image: IMC_PHOTOS.hillsTrek,
   },
   {
     id: "talakona-trail-weekend",
@@ -66,7 +67,7 @@ export const EXPERIENCES: Experience[] = [
     venue: "Pickup at Alipiri Circle",
     price: "₹1,499 with transport",
     blurb: "A forest trail to the waterfall with a slow breakfast by the stream. Moderate walking.",
-    image: MEDIA.imcNature,
+    image: IMC_PHOTOS.waterfall,
   },
   {
     id: "kalamkari-canvas-lab",
@@ -78,7 +79,7 @@ export const EXPERIENCES: Experience[] = [
     venue: "Makers' Loft, Air Bypass Road",
     price: "₹699 with materials",
     blurb: "Learn the pen-and-natural-dye style that comes from nearby Srikalahasti, and take your piece home.",
-    image: MEDIA.imcArt,
+    image: IMC_PHOTOS.craftCircle,
   },
   {
     id: "ruchulu-food-walk",
@@ -102,7 +103,7 @@ export const EXPERIENCES: Experience[] = [
     venue: "Meet at SV University main gate",
     price: "Free · bring your cycle",
     blurb: "A sunrise ride out to the Vijayanagara-era fort with a short history walk at the top.",
-    image: MEDIA.cliffs,
+    image: IMC_PHOTOS.bikeRide,
   },
   {
     id: "temple-city-founders-chai",
@@ -114,7 +115,7 @@ export const EXPERIENCES: Experience[] = [
     venue: "The Hub, Bhavani Nagar",
     price: "₹99",
     blurb: "Three five-minute pitches, honest feedback and a lot of chai. Builders, students and the curious.",
-    image: MEDIA.imcCircle,
+    image: IMC_PHOTOS.roundTable,
   },
   {
     id: "swarnamukhi-sketch-walk",
@@ -126,7 +127,7 @@ export const EXPERIENCES: Experience[] = [
     venue: "Riverside, near the old bridge",
     price: "Free",
     blurb: "Sketchbooks and phones out: capture the river at golden hour, then share what you made.",
-    image: MEDIA.sketching,
+    image: IMC_PHOTOS.artTable,
   },
   {
     id: "filter-coffee-strangers",
@@ -139,7 +140,7 @@ export const EXPERIENCES: Experience[] = [
     price: "₹149 with coffee",
     recurring: "Every other Sunday",
     blurb: "New to the city or just want new friends? Small tables, simple prompts, real conversations.",
-    image: MEDIA.imcCrowd,
+    image: IMC_PHOTOS.meetup,
   },
   {
     id: "palm-leaf-pages",
@@ -151,7 +152,7 @@ export const EXPERIENCES: Experience[] = [
     venue: "Reading room, Makers' Loft",
     price: "Free",
     blurb: "This month: short stories from Telugu writers, read in English and Telugu.",
-    image: MEDIA.imcCircle,
+    image: IMC_PHOTOS.bookClub,
   },
   {
     id: "horsley-starlight-camp",
@@ -163,7 +164,7 @@ export const EXPERIENCES: Experience[] = [
     venue: "Pickup at Tirupati bus stand",
     price: "₹2,999 overnight",
     blurb: "Tents, a bonfire and a night sky you forgot existed. Back in town by Sunday lunch.",
-    image: MEDIA.trek,
+    image: IMC_PHOTOS.hilltop,
   },
   {
     id: "seven-hills-box-cricket-cup",
@@ -175,7 +176,7 @@ export const EXPERIENCES: Experience[] = [
     venue: "Turf Arena, Renigunta Road",
     price: "₹600 per team",
     blurb: "Six-a-side, knockout format. Bring a team or join one on the day.",
-    image: MEDIA.cricket,
+    image: IMC_PHOTOS.nightCricket,
   },
 ];
 
