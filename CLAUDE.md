@@ -34,9 +34,9 @@ imc_website_production   └──► Vercel (legacy) ──► www.imctirupati.
 
 - **Repo:** `itsmycommunitytirupati/imc_website_production`, production branch `main`.
 - **Cloudflare:** account `itsmycommunity.tirupati@gmail.com` (id `cebb5851f945ae9fe3d02d832b36dc1f`).
-  Build command `npm run build`, deploy command `npx wrangler deploy`, root `/`. There is no
-  `wrangler.jsonc` yet: Wrangler auto-detects Vite and serves `dist/` as static assets in SPA mode.
-  A push to `main` is live on workers.dev in about 50 seconds.
+  Build command `npm run build`, deploy command `npx wrangler deploy`, root `/`. `wrangler.jsonc`
+  serves `dist/` as static assets in SPA mode. Keep it: preview builds (`wrangler versions upload`)
+  fail without it. A push to `main` is live on workers.dev in about 50 seconds.
 - **Vercel** (project `imc2026/imctirupati`) still serves `imctirupati.com` and also redeploys on
   every push (about 20 seconds). It retires when the domain moves to the Worker.
 - **Every push to `main` is live for the public.** Work on a branch, check its preview, then merge.
@@ -109,7 +109,7 @@ src/
 ## Roadmap
 
 1. **Subdomains:** attach `help.imctirupati.com` and `admin.imctirupati.com` as Worker custom
-   domains (add `wrangler.jsonc` with `routes: [{ pattern, custom_domain: true }]`), then set
+   domains (in `wrangler.jsonc`: `routes: [{ pattern, custom_domain: true }]`), then set
    `GUIDE_BASE` in `lib/site.ts` to `https://help.imctirupati.com`.
 2. **Admin protection:** Cloudflare Access (Zero Trust) policy on `admin.imctirupati.com` *and*
    `imctirupati.com/admin*`, allowing only the IMC team's emails.

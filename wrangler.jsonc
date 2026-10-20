@@ -1,0 +1,11 @@
+// Cloudflare Worker config. Workers Builds runs `npx wrangler deploy` on main
+// and `npx wrangler versions upload` (preview URLs) on other branches.
+// Matches the settings the dashboard set up on 2026-10-08.
+{
+  "name": "imc-website-production",
+  "compatibility_date": "2026-10-06",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
