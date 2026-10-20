@@ -1,13 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Space Grotesk", sans-serif;
-}
+  --font-display: "Plus Jakarta Sans", "Inter", ui-sans-serif, sans-serif;
 
-@utility bg-radial-gradient-hero {
-  background-image: radial-gradient(circle at 75% 40%, rgba(249, 115, 22, 0.15) 0%, transparent 60%);
+  /* IMC visitor-first palette: saffron brand on warm cream. */
+  --color-brand: #c2410c;
+  --color-brand-dark: #9a3412;
+  --color-brand-soft: #fff1e6;
+  --color-cream: #fffaf5;
+  --color-peach: #fdeee2;
+  --color-ink: #141414;
+  --color-muted: #5f5a54;
+  --color-line: #ece2d8;
 }
 
 @utility scrollbar-none {
@@ -17,28 +23,28 @@
   }
 }
 
-/* Custom scrollbars for pristine experience */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+@utility dot-grid {
+  background-image: radial-gradient(rgb(20 20 20 / 0.08) 1px, transparent 1px);
+  background-size: 18px 18px;
 }
 
-::-webkit-scrollbar-track {
-  background: #020617;
+html {
+  scroll-padding-top: 88px;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #ea580c;
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
 }
 
 button,
 a,
-[onclick],
 [role="button"] {
   cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
 }
