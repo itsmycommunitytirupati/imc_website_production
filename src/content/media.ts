@@ -1,26 +1,38 @@
 import imcCircle from "../../assets/about1.jpeg";
-import imcMoment2 from "../../assets/about2.jpeg";
-import imcMoment3 from "../../assets/about3.jpeg";
-import imcMoment4 from "../../assets/10.jpeg";
+import imcNature from "../../assets/about2.jpeg";
+import imcArt from "../../assets/about3.jpeg";
+import imcCrowd from "../../assets/10.jpeg";
 
 // Unsplash photos are hotlinked, as the Unsplash License allows.
-// Swap any of these for IMC's own photos as they come in.
+// Swap any of these for IMC's own photos as they come in; a real shoot of a
+// visiting family at Alipiri or Tirumala would beat every stock photo here.
 const unsplash = (id: string, w = 900) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=75`;
 
 export const MEDIA = {
-  hero: {
-    src: unsplash("photo-1730130596425-197566414dc4", 1600),
-    alt: "A South Indian family in traditional silk clothes sharing a festive moment at home",
-    credit: "Photo: @cr029 on Unsplash",
-    creditUrl: "https://unsplash.com/photos/LvelDKbCeZg",
+  // Hero is a composition: Tirumala and the Seshachalam hills, with a family inset.
+  hills: {
+    src: unsplash("photo-1741003412854-bd4b264c4af3", 1600),
+    alt: "The white gopuram of Tirumala temple against the green Seshachalam hills",
+    credit: "@theushakiran",
+    creditUrl: "https://unsplash.com/photos/NreNNb8Wn2M",
   },
-  meetups: unsplash("photo-1779903595001-b99b829e5ca3"),
-  nature: unsplash("photo-1666545381278-e7c9bc5c0ac9"),
-  culture: unsplash("photo-1757085242652-f8cd4d3de889"),
+  family: {
+    src: unsplash("photo-1657912230234-87f45165424d", 700),
+    alt: "A smiling young family with their toddler, out on a family trip",
+    credit: "@nilankakariyawasam",
+    creditUrl: "https://unsplash.com/photos/AKk37Avu6o8",
+  },
+  cliffs: unsplash("photo-1605357310334-5f19dd682b5c"),
+  townView: unsplash("photo-1623039003809-6ecabd1e2b1c"),
+  trek: unsplash("photo-1666545381278-e7c9bc5c0ac9"),
+  dosa: unsplash("photo-1694849789325-914b71ab4075"),
+  cricket: unsplash("photo-1706102005390-2d1f41fdddcd"),
+  guitar: unsplash("photo-1791326457073-2fcd8ff789b7"),
+  sketching: unsplash("photo-1757085242652-f8cd4d3de889"),
   // Real IMC moments.
-  imcCircle,
-  imcMoment2,
-  imcMoment3,
-  imcMoment4,
+  imcCircle, // book club around a long table
+  imcNature, // Nature Retreat outing
+  imcArt, // Art & Craft Club
+  imcCrowd, // big group shot after a dance session
 };

@@ -129,3 +129,32 @@ export const TOPICS: Topic[] = [
     askPrompts: ["What can we do with half a day free?", "Any nature spots near Tirupati?"],
   },
 ];
+
+// Home page: plan by who's travelling. Each opens the guide with a prompt.
+export const TRIP_TYPES = [
+  { id: "first", title: "First visit", tip: "Book darshan early, carry ID, and keep the whole day free.", prompt: "It's our first visit to Tirumala. How should we plan?" },
+  { id: "elders", title: "With elders", tip: "Take the bus up the ghat, plan rest breaks, and check the senior-citizen quota.", prompt: "We're travelling with elderly parents." },
+  { id: "kids", title: "With little ones", tip: "Plan around naps, carry snacks, and save the zoo park for the afternoon.", prompt: "We're visiting with young kids." },
+  { id: "walk", title: "Walking up", tip: "Alipiri or Srivari Mettu: start early and send your luggage up ahead.", prompt: "We want to walk up to Tirumala." },
+  { id: "day", title: "Just one day", tip: "Darshan, a free meal on the hill, then Tiruchanur in the evening.", prompt: "Suggest a relaxed day plan around Tirupati" },
+  { id: "weekend", title: "A long weekend", tip: "Add Chandragiri Fort, Sri Kalahasti, or a forest trail to Talakona.", prompt: "We have a weekend. What else can we see nearby?" },
+] as const;
+
+export const BEFORE_YOU_GO = [
+  "Photo ID for every adult",
+  "Traditional clothes for darshan",
+  "Booking confirmations from the official portal",
+  "Phones and bags go into the free deposit counters",
+  "Water, a light snack and comfortable footwear",
+  "A little cash; UPI works almost everywhere",
+];
+
+// Approximate, from Tirupati town centre.
+export const DISTANCES = [
+  { place: "Tirumala (by ghat road)", value: "about 20 km" },
+  { place: "Tiruchanur temple", value: "about 5 km" },
+  { place: "Renigunta Junction", value: "about 10 km" },
+  { place: "Tirupati airport", value: "about 15 km" },
+  { place: "Chandragiri Fort", value: "about 15 km" },
+  { place: "Sri Kalahasti", value: "about 35 km" },
+];

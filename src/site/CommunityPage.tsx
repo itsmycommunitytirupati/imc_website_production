@@ -152,7 +152,7 @@ export default function CommunityPage() {
           <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">Moments from the IMC archive</h2>
           <p className="mt-2 text-white/70">Is that you in the picture? Make your own memories.</p>
           <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
-            {[MEDIA.imcCircle, MEDIA.imcMoment2, MEDIA.imcMoment3, MEDIA.imcMoment4].map((src, i) => (
+            {[MEDIA.imcCircle, MEDIA.imcNature, MEDIA.imcArt, MEDIA.imcCrowd].map((src, i) => (
               <img key={src} src={src} alt="" loading="lazy" className={`h-full w-full rounded-xl object-cover ${i % 2 ? "aspect-[3/4] md:mt-8" : "aspect-[3/4]"}`} />
             ))}
           </div>

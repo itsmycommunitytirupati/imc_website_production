@@ -125,8 +125,37 @@ const ENTRIES: Record<string, Entry> = {
       followUps: ["darshan", "transport"],
     },
   },
+  firstVisit: {
+    keywords: ["first visit", "first time", "first trip", "never been", "how should we plan"],
+    answer: {
+      title: "Welcome! Here's how a first visit usually goes.",
+      points: [
+        "Book darshan (and a room, if staying) on the official TTD portal as early as you can",
+        "Carry photo ID for every adult and dress traditionally",
+        "Go up by bus or cab in the morning; keep the whole day free",
+        "Leave phones and bags at the free deposit counters before the temple",
+      ],
+      ask: "What would you like to sort out next?",
+      followUps: ["darshan", "stay", "transport"],
+      officialLink: { label: "Book on the official TTD portal", url: OFFICIAL.ttdBooking },
+    },
+  },
+  kids: {
+    keywords: ["kids", "children", "child", "baby", "toddler", "little ones"],
+    answer: {
+      title: "Travelling with little ones, made easier.",
+      points: [
+        "Plan darshan around nap times and carry snacks and water",
+        "Keep a change of clothes handy; queues can be long",
+        "The Sri Venkateswara Zoological Park is a great afternoon for kids",
+        "Ask about facilities for families with infants when you book",
+      ],
+      followUps: ["day-plan", "food", "stay"],
+      officialLink: { label: "Check official guidance for families", url: OFFICIAL.ttdInfo },
+    },
+  },
   nearby: {
-    keywords: ["nearby", "around", "visit", "see", "places", "sightseeing", "things to do", "half day", "kids", "waterfall", "fort", "nature", "free time"],
+    keywords: ["nearby", "around", "visit", "see", "places", "sightseeing", "things to do", "half day", "weekend", "waterfall", "fort", "nature", "free time"],
     answer: {
       title: "Good things to do nearby.",
       points: [

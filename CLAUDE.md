@@ -20,9 +20,12 @@ Site routes: `/`, `/visitor-guide` (anchors `#tirumala`, `#getting-around`, `#fo
 `#get-involved`), `/saved`, `/privacy` and `/terms` (old legal page). Routing is a tiny
 History-API router in `src/lib/router.tsx`; use `<Link to>` and `navigate()`, never full reloads.
 
-The home page follows the "visitor-first concept" mock-up: hero search ("Ask guide") → topic chips →
-official TTD band → example conversation, "Make it your visit", "Discover the community". Mobile has
-a bottom tab bar (Guide / Explore / Saved).
+The home page follows the "visitor-first concept" mock-up: hero search ("Ask guide", popular
+questions) → topic chips → official TTD band → "Plan for the way you travel" (trip types that open
+the guide with a prompt) → example conversation, "Make it your visit", "Discover the community" →
+"Before you go" checklist and distances → a warm "Namaskaram" closing band. Mobile has a bottom
+tab bar (Guide / Explore / Saved). The hero image is a composition: Tirumala gopuram and the
+Seshachalam hills, with a family photo inset. It must always say *Tirupati* at a glance.
 
 ## Deploy pipeline (verified 2026-10-21)
 
@@ -104,7 +107,11 @@ src/
   icons (lucide-react, plus `GopuramIcon` for temple topics).
 - Community page voice is bolder and more playful (dot grid, black pills, sticker tags) for the
   youth audience. Visitor pages stay calm and practical.
-- Check every change at 375px and at 1280px or wider. The home page must keep matching the mock-up.
+- Motion: wrap sections in `site/Reveal.tsx` (fade-up on scroll; respects reduced motion). Cards
+  lift slightly on hover. Keep it subtle.
+- Photos must match their subject: real IMC photos for clubs (`imcNature`, `imcArt`, `imcCircle`,
+  `imcCrowd`), stock photos only where IMC has none.
+- Check every change at 375px, 800px and 1200px or wider. The home page must keep matching the mock-up.
 
 ## Roadmap
 

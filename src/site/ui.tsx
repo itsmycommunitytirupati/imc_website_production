@@ -69,7 +69,7 @@ export function Header() {
         <Link to="/" className="shrink-0" onClick={() => setOpen(false)}>
           <Logo />
         </Link>
-        <nav className="mx-auto hidden items-center gap-10 md:flex" aria-label="Main">
+        <nav className="mx-auto hidden items-center gap-6 whitespace-nowrap md:flex lg:gap-10" aria-label="Main">
           {NAV.map((n) => (
             <Link
               key={n.to}
@@ -83,8 +83,8 @@ export function Header() {
         </nav>
         <div className="ml-auto flex items-center gap-6 md:ml-0">
           <LanguageSelect />
-          <span className="hidden h-6 w-px bg-line md:block" />
-          <Link to={CONTACT.whatsapp} className="hidden text-sm font-medium hover:text-brand md:block">
+          <span className="hidden h-6 w-px bg-line lg:block" />
+          <Link to={CONTACT.whatsapp} className="hidden whitespace-nowrap text-sm font-medium hover:text-brand lg:block">
             Contact IMC
           </Link>
         </div>
@@ -108,17 +108,48 @@ export function Header() {
 export function Footer() {
   return (
     <footer className="border-t border-line bg-white pb-24 md:pb-0">
-      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <Logo compact />
-        <nav className="flex items-center gap-4 text-sm text-ink/80" aria-label="Footer">
-          <Link to="/community#about" className="hover:text-brand">About IMC</Link>
-          <span className="text-line">|</span>
-          <Link to={CONTACT.whatsapp} className="hover:text-brand">Contact</Link>
-          <span className="text-line">|</span>
-          <Link to="/privacy" className="hover:text-brand">Privacy</Link>
-        </nav>
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+        <div>
+          <Logo compact />
+          <p className="mt-3 max-w-xs text-sm text-muted">A local welcome to Tirupati, from the people who live here.</p>
+        </div>
+        <FooterCol title="Visit">
+          <Link to="/visitor-guide#tirumala">Tirumala visit</Link>
+          <Link to="/visitor-guide#getting-around">Getting around</Link>
+          <Link to="/visitor-guide#food-stays">Food &amp; stays</Link>
+          <Link to="/guide">Ask the guide</Link>
+        </FooterCol>
+        <FooterCol title="Community">
+          <Link to="/experiences">Experiences</Link>
+          <Link to="/community#clubs">Clubs</Link>
+          <Link to="/community#get-involved">Host with us</Link>
+          <Link to="/community#about">About IMC</Link>
+        </FooterCol>
+        <FooterCol title="Contact">
+          <Link to={CONTACT.whatsapp}>WhatsApp {CONTACT.phone}</Link>
+          <Link to={`mailto:${CONTACT.email}`}>Email us</Link>
+          <Link to={CONTACT.instagram}>Instagram @imc.tirupati</Link>
+        </FooterCol>
+      </div>
+      <div className="border-t border-line">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-xs text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <p>IMC is an independent community guide and is not affiliated with TTD. Made with care in Tirupati.</p>
+          <nav className="flex gap-4" aria-label="Legal">
+            <Link to="/privacy" className="hover:text-brand">Privacy</Link>
+            <Link to="/terms" className="hover:text-brand">Terms</Link>
+          </nav>
+        </div>
       </div>
     </footer>
+  );
+}
+
+function FooterCol({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div>
+      <p className="text-sm font-semibold">{title}</p>
+      <div className="mt-3 flex flex-col gap-2 text-sm text-muted [&_a:hover]:text-brand">{children}</div>
+    </div>
   );
 }
 

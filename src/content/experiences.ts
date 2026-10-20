@@ -41,7 +41,7 @@ export const EXPERIENCES: Experience[] = [
     venue: "Banyan Courtyard Café, Tilak Road",
     price: "₹199",
     blurb: "An acoustic evening on the terrace. Bring a song, a guitar, or just your voice for the chorus.",
-    image: MEDIA.meetups,
+    image: MEDIA.guitar,
   },
   {
     id: "alipiri-run-club",
@@ -54,7 +54,7 @@ export const EXPERIENCES: Experience[] = [
     price: "Free",
     recurring: "Every Sunday",
     blurb: "A friendly 5K at the foot of the hills, all paces welcome, idli and chai after.",
-    image: MEDIA.imcMoment4,
+    image: MEDIA.townView,
   },
   {
     id: "talakona-trail-weekend",
@@ -66,7 +66,7 @@ export const EXPERIENCES: Experience[] = [
     venue: "Pickup at Alipiri Circle",
     price: "₹1,499 with transport",
     blurb: "A forest trail to the waterfall with a slow breakfast by the stream. Moderate walking.",
-    image: MEDIA.nature,
+    image: MEDIA.imcNature,
   },
   {
     id: "kalamkari-canvas-lab",
@@ -78,7 +78,7 @@ export const EXPERIENCES: Experience[] = [
     venue: "Makers' Loft, Air Bypass Road",
     price: "₹699 with materials",
     blurb: "Learn the pen-and-natural-dye style that comes from nearby Srikalahasti, and take your piece home.",
-    image: MEDIA.culture,
+    image: MEDIA.imcArt,
   },
   {
     id: "ruchulu-food-walk",
@@ -90,7 +90,7 @@ export const EXPERIENCES: Experience[] = [
     venue: "Starts at Gandhi Road",
     price: "₹349",
     blurb: "Pesarattu, ghee karam dosa and filter coffee: a breakfast crawl through the old town.",
-    image: MEDIA.imcMoment2,
+    image: MEDIA.dosa,
   },
   {
     id: "chandragiri-heritage-ride",
@@ -102,7 +102,7 @@ export const EXPERIENCES: Experience[] = [
     venue: "Meet at SV University main gate",
     price: "Free · bring your cycle",
     blurb: "A sunrise ride out to the Vijayanagara-era fort with a short history walk at the top.",
-    image: MEDIA.nature,
+    image: MEDIA.cliffs,
   },
   {
     id: "temple-city-founders-chai",
@@ -114,7 +114,7 @@ export const EXPERIENCES: Experience[] = [
     venue: "The Hub, Bhavani Nagar",
     price: "₹99",
     blurb: "Three five-minute pitches, honest feedback and a lot of chai. Builders, students and the curious.",
-    image: MEDIA.imcMoment3,
+    image: MEDIA.imcCircle,
   },
   {
     id: "swarnamukhi-sketch-walk",
@@ -126,7 +126,7 @@ export const EXPERIENCES: Experience[] = [
     venue: "Riverside, near the old bridge",
     price: "Free",
     blurb: "Sketchbooks and phones out: capture the river at golden hour, then share what you made.",
-    image: MEDIA.culture,
+    image: MEDIA.sketching,
   },
   {
     id: "filter-coffee-strangers",
@@ -139,7 +139,7 @@ export const EXPERIENCES: Experience[] = [
     price: "₹149 with coffee",
     recurring: "Every other Sunday",
     blurb: "New to the city or just want new friends? Small tables, simple prompts, real conversations.",
-    image: MEDIA.imcCircle,
+    image: MEDIA.imcCrowd,
   },
   {
     id: "palm-leaf-pages",
@@ -163,7 +163,7 @@ export const EXPERIENCES: Experience[] = [
     venue: "Pickup at Tirupati bus stand",
     price: "₹2,999 overnight",
     blurb: "Tents, a bonfire and a night sky you forgot existed. Back in town by Sunday lunch.",
-    image: MEDIA.nature,
+    image: MEDIA.trek,
   },
   {
     id: "seven-hills-box-cricket-cup",
@@ -175,7 +175,7 @@ export const EXPERIENCES: Experience[] = [
     venue: "Turf Arena, Renigunta Road",
     price: "₹600 per team",
     blurb: "Six-a-side, knockout format. Bring a team or join one on the day.",
-    image: MEDIA.imcMoment4,
+    image: MEDIA.cricket,
   },
 ];
 
