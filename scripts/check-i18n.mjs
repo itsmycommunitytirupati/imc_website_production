@@ -16,13 +16,14 @@ const FILES = [
   "src/content/experiences.ts",
   "src/content/community.ts",
   "src/content/hills.ts",
+  "src/content/places.ts",
 ];
 // Proper names and data that stay as written.
 const SKIP_FILES_FOR_LITERALS = new Set(["src/site/Reveal.tsx"]);
 // Also skipped: SVG paths, browser-tab titles and meta descriptions (kept English for search),
 // prefilled WhatsApp messages, menu button labels and the illustrative phone chat.
 const SKIP = /^(IMC|IMC Tirupati|WhatsApp|Instagram|Unsplash|TTD|Photos:|Language: .*|Choose language|Loading|M[\d.]+ .*|.* \| IMC Tirupati.*|IMC Tirupati \|.*|Hi IMC!.*|Partnering with .*|(Open|Close) menu|Open the guide|IMC Tirupati, It's My Community|Easy 5K|Steady 7K|Just coffee after ☕|Ask a local guide about .*|Clubs, meetups and experiences .*|Darshan options, getting around, .*|Find your way, plan your visit and connect with local people in Tirupati\..*|Music evenings, food walks, .*)$/;
-const KEEP_KEYS = new Set(["title", "text", "tip", "story", "blurb", "price", "recurring", "label", "note", "cta", "q", "a", "heading", "summary", "place", "value", "greeting", "ask", "prompt"]);
+const KEEP_KEYS = new Set(["title", "text", "tip", "story", "blurb", "price", "recurring", "label", "note", "cta", "q", "a", "heading", "summary", "place", "value", "greeting", "ask", "prompt", "area", "bestFor", "route", "knownFor", "details"]);
 
 function looksLikeText(s) {
   if (!/[A-Za-z]/.test(s) || s.length < 2) return false;
@@ -51,6 +52,7 @@ export function collectKeys() {
       if (key ? !KEEP_KEYS.has(key) : !/^[A-Z0-9₹]/.test(s) || (!/\s/.test(s) && !isContent)) continue;
       if (/^T\d|^en-/.test(s)) continue;
       if (rel === "src/content/experiences.ts" && key === "title") continue; // event names stay as written
+      if (rel === "src/content/places.ts" && key === "label") continue; // source names are brands
       keys.add(s);
     }
   }

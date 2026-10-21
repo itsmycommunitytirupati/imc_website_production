@@ -1,4 +1,4 @@
-import { OFFICIAL } from "../lib/site";
+import { OFFICIAL } from "../lib/links";
 
 // Curated answers for the guide preview. When the AI backend is wired up
 // (a Worker route calling the model), these become its grounding notes.
@@ -18,7 +18,7 @@ interface Entry {
   answer: Answer;
 }
 
-const ENTRIES: Record<string, Entry> = {
+export const ENTRIES: Record<string, Entry> = {
   elderly: {
     keywords: ["elder", "elderly", "parents", "senior", "grandma", "grandpa", "wheelchair", "disab", "accessib", "comfortable"],
     answer: {

@@ -59,7 +59,6 @@ export default function ChatPreview() {
           <span className="block font-semibold">{t("IMC Guide")}</span>
           <span className="text-xs text-white/80">{t("Online · answers in seconds")}</span>
         </span>
-        <span className="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider">{t("Example")}</span>
       </div>
 
       <div className="dot-grid min-h-[330px] flex-1 space-y-3 bg-[#fbf6f0] px-3 py-4">

@@ -47,6 +47,34 @@ imc_website_production   └──► Vercel (legacy) ──► www.imctirupati.
 - `public/deploy-check.txt` is a harmless probe: change it, push, and fetch
   `/deploy-check.txt` to confirm a deploy landed.
 
+## AI guide (Worker agent)
+
+`worker/` is the Worker entry (`wrangler.jsonc` → `main`). It serves `dist/` and answers
+`POST /api/guide` (`GET /api/health` shows the model and search backend). The guide page calls it;
+if it fails or times out (e.g. the free Workers AI allowance is used up, or on the Vercel copy),
+the page falls back to the curated answers in `content/guide.ts`.
+
+- **Model:** Workers AI `@cf/google/gemma-4-26b-a4b-it` (env `GUIDE_MODEL`), thinking switched off
+  (`worker/llm.ts`), about 1 s per step. Free daily allowance: 10,000 neurons, roughly 50 to 80
+  questions a day; first questions are cached for 6 hours (Cache API) to stretch it.
+- **Agent loop (`worker/agent.ts`):** JSON protocol, max 5 steps. Tools (`worker/tools.ts`):
+  `search_local_guide` (IMC notes, `worker/kb.ts`), `search_places` (directory in
+  `content/places.ts`, filter by kind and budget), `web_search` (Tavily if `TAVILY_API_KEY` is set,
+  else Wikipedia), `fetch_official_page` (allow-listed TTD/government hosts only).
+- **Guardrails:** input length cap, per-IP rate limit, prompt-injection regex, Llama Guard 3 screen
+  (`worker/guardrails.ts`); must gather evidence before answering; over-refusal guard for clearly
+  on-topic questions; a second fact-check pass with the question and evidence; then hard rules in
+  code: every number in an answer must appear in the evidence, links only from evidence,
+  markdown/evidence labels stripped, max 6 points. Answers reply in the visitor's language.
+- **Web search key (optional):** create a free Tavily key, then run `npx wrangler secret put TAVILY_API_KEY`
+  yourself (never paste keys into chat or code).
+- **Test:** `npx wrangler dev --port 8787`, then `node scripts/eval-guide.mjs` (10 cases incl.
+  Telugu/Hindi, injection, off-topic, invented-phone and live-timing baits). Run it after any
+  prompt or data change. For the UI, run `npm run dev` too (Vite proxies `/api` to 8787).
+- **Places directory (`content/places.ts`):** stays, transport, food and tours by budget, each
+  with sources and `CHECKED` date; shown in the visitor guide (`site/PlacesSections.tsx`) and used
+  by the agent. Re-research and update the date at least monthly; never state a price without a source.
+
 ## Commands
 
 ```bash

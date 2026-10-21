@@ -8,6 +8,7 @@ import { MEDIA } from "../content/media";
 import { IMC_PHOTOS } from "../content/photos";
 import { GopuramIcon, PageHero } from "./ui";
 import Reveal from "./Reveal";
+import { RidesByBudget, StaysByBudget, WhereToEat } from "./PlacesSections";
 
 type IconType = ComponentType<{ className?: string; strokeWidth?: number }>;
 
@@ -170,6 +171,13 @@ export default function VisitorGuidePage() {
                     </Link>
                   )}
                 </div>
+                {topic.id === "getting-around" && <Reveal><RidesByBudget /></Reveal>}
+                {topic.id === "food-stays" && (
+                  <>
+                    <Reveal><StaysByBudget /></Reveal>
+                    <Reveal><WhereToEat /></Reveal>
+                  </>
+                )}
               </div>
             </section>
           );

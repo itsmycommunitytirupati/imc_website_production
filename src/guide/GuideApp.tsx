@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type ComponentType, type FormEvent } from "react";
 import { motion } from "motion/react";
 import {
-  ArrowLeft, ArrowUp, ArrowUpRight, Baby, BedDouble, Bus, Check, CheckCheck, HeartHandshake, Info,
-  MapPinned, MessageCircle, ParkingSquare, Shirt, UtensilsCrossed,
+  ArrowLeft, ArrowUp, ArrowUpRight, Baby, BadgeCheck, BedDouble, Bus, Check, CheckCheck, HeartHandshake, Info,
+  MapPinned, MessageCircle, ParkingSquare, Shirt, UtensilsCrossed, WifiOff,
 } from "lucide-react";
 import { Link, useLocation } from "../lib/router";
 import { CONTACT, LANGS, OFFICIAL, useLang, usePageTitle, type Lang } from "../lib/site";
@@ -12,10 +12,22 @@ import { MEDIA } from "../content/media";
 import { GopuramIcon, LanguageMenu, Logo } from "../site/ui";
 
 // Guide surface: help.imctirupati.com (or /guide on the main site until that
-// domain is attached). Answers come from curated notes for now; the AI call
-// slots in behind ask() once the Worker API route and model key exist.
+// domain is attached). Questions go to the AI agent in the Worker
+// (worker/agent.ts); if it can't answer, IMC's curated notes reply instead.
 
-type Msg = { id: number; role: "user"; text: string } | { id: number; role: "imc"; answer: Answer | null };
+interface AiAnswer {
+  title: string;
+  points: string[];
+  sources: { label: string; url: string }[];
+  suggestions: string[];
+  outOfScope?: boolean;
+}
+
+type Reply =
+  | { kind: "ai"; answer: AiAnswer; tools: string[] }
+  | { kind: "curated"; answer: Answer; offline: boolean };
+
+type Msg = { id: number; role: "user"; text: string } | { id: number; role: "imc"; reply: Reply | null };
 type IconType = ComponentType<{ className?: string; strokeWidth?: number }>;
 
 const TOPICS: { label: string; prompt: string; Icon: IconType }[] = [
@@ -30,10 +42,32 @@ const TOPICS: { label: string; prompt: string; Icon: IconType }[] = [
   { label: "Nearby", prompt: "What can we see nearby?", Icon: MapPinned },
 ];
 
+const TOOL_LABELS: Record<string, string> = {
+  search_local_guide: "IMC local guide",
+  search_places: "Stays, transport & food list",
+  web_search: "Web search",
+  fetch_official_page: "Official TTD page",
+};
+
+const PROGRESS = ["Checking the local guide…", "Comparing options for your budget…", "Looking up the latest information…", "Double-checking the facts…"];
+
 function Avatar({ small = false }: { small?: boolean }) {
   return (
     <span className={`grid shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand to-orange-400 font-extrabold text-white shadow-sm ${small ? "h-8 w-8 text-[9px]" : "h-10 w-10 text-[10px]"}`}>IMC</span>
   );
+}
+
+// Condense earlier turns so the agent keeps context without long prompts.
+function historyFor(msgs: Msg[]) {
+  return msgs
+    .filter((m) => m.role === "user" || m.reply)
+    .slice(-6)
+    .map((m) => {
+      if (m.role === "user") return { role: "user" as const, content: m.text };
+      const r = m.reply!;
+      const a = r.kind === "ai" ? r.answer : r.answer;
+      return { role: "assistant" as const, content: [a.title, ...a.points].join(" ") };
+    });
 }
 
 export default function GuideApp() {
@@ -44,22 +78,41 @@ export default function GuideApp() {
   const onMainSite = !window.location.hostname.startsWith("help.");
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [draft, setDraft] = useState("");
+  const [busy, setBusy] = useState(false);
   const nextId = useRef(1);
   const endRef = useRef<HTMLDivElement>(null);
   const askedInitial = useRef(false);
+  const msgsRef = useRef<Msg[]>([]);
+  msgsRef.current = msgs;
 
-  // `match` lets a tapped topic show in the visitor's language but match on its English prompt.
-  const ask = (text: string, match?: string) => {
+  // `match` lets a tapped topic show in the visitor's language but fall back on its English prompt.
+  const ask = async (text: string, match?: string) => {
     const q = text.trim();
-    if (!q) return;
+    if (!q || busy) return;
+    const userMsg: Msg = { id: nextId.current, role: "user", text: q };
     const replyId = nextId.current + 1;
-    setMsgs((m) => [...m, { id: nextId.current, role: "user", text: q }, { id: replyId, role: "imc", answer: null }]);
     nextId.current += 2;
+    setMsgs((m) => [...m, userMsg, { id: replyId, role: "imc", reply: null }]);
     setDraft("");
-    // A short "thinking" beat so the reply feels considered, then the answer.
-    setTimeout(() => {
-      setMsgs((m) => m.map((x) => (x.id === replyId ? { ...x, answer: answerFor(match ?? q) } : x)));
-    }, 700);
+    setBusy(true);
+
+    let reply: Reply;
+    try {
+      const res = await fetch("/api/guide", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ lang, messages: [...historyFor(msgsRef.current), { role: "user", content: q }] }),
+        signal: AbortSignal.timeout(60_000),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      const data = (await res.json()) as { answer: AiAnswer; meta?: { tools?: string[] } };
+      if (!data.answer?.title) throw new Error("empty");
+      reply = { kind: "ai", answer: data.answer, tools: data.meta?.tools ?? [] };
+    } catch {
+      reply = { kind: "curated", answer: answerFor(match ?? q), offline: true };
+    }
+    setMsgs((m) => m.map((x) => (x.id === replyId ? { ...x, reply } : x)));
+    setBusy(false);
   };
 
   useEffect(() => {
@@ -85,7 +138,14 @@ export default function GuideApp() {
   };
 
   const last = [...msgs].reverse().find((m): m is Extract<Msg, { role: "imc" }> => m.role === "imc");
-  const suggestions = last?.answer?.followUps ?? [];
+  const suggestions: { label: string; send: string; match?: string }[] = !last?.reply
+    ? []
+    : last.reply.kind === "ai"
+      ? last.reply.answer.suggestions.map((s) => ({ label: s, send: s }))
+      : (last.reply.answer.followUps ?? []).map((f) => {
+          const { label, prompt } = followUpPrompt(f);
+          return { label: t(label), send: t(prompt), match: prompt };
+        });
 
   return (
     <div className="flex min-h-screen flex-col bg-cream">
@@ -104,7 +164,7 @@ export default function GuideApp() {
           </span>
           <span className="leading-tight">
             <span className="block font-semibold">{t("IMC Guide")}</span>
-            <span className="text-xs text-muted">{t("Online · answers in seconds")}</span>
+            <span className="text-xs text-muted">{t("AI guide · answers checked against sources")}</span>
           </span>
         </div>
       </header>
@@ -119,6 +179,9 @@ export default function GuideApp() {
                 <p className="font-hand text-2xl text-orange-300">నమస్కారం 🙏</p>
                 <h1 className="mt-1 max-w-md font-display text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">{t("How can we help with your visit?")}</h1>
                 <p className="mt-3 max-w-sm text-white/75">{t("Ask in your own words, in English, Telugu, Tamil or Hindi.")}</p>
+                <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium ring-1 ring-white/20">
+                  <BadgeCheck className="h-4 w-4 text-emerald-300" /> {t("Best stays, transport and food for your budget")}
+                </p>
               </div>
             </div>
             <p className="mt-8 text-sm font-semibold text-muted">{t("Popular topics")}</p>
@@ -152,7 +215,7 @@ export default function GuideApp() {
             ) : (
               <motion.div key={m.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex items-end gap-2.5">
                 <Avatar small />
-                {m.answer ? <AnswerBubble a={m.answer} onAsk={ask} /> : <Typing />}
+                {!m.reply ? <Thinking /> : m.reply.kind === "ai" ? <AiBubble reply={m.reply} /> : <CuratedBubble a={m.reply.answer} offline={m.reply.offline} />}
               </motion.div>
             ),
           )}
@@ -162,16 +225,13 @@ export default function GuideApp() {
 
       <div className="fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-cream via-cream to-cream/0 pt-6">
         <div className="mx-auto max-w-3xl px-4">
-          {suggestions.length > 0 && (
+          {suggestions.length > 0 && !busy && (
             <div className="scrollbar-none mb-2 flex gap-2 overflow-x-auto">
-              {suggestions.map((f) => {
-                const { label, prompt } = followUpPrompt(f);
-                return (
-                  <button key={f} onClick={() => ask(t(prompt), prompt)} className="shrink-0 rounded-full border border-brand/30 bg-white px-3.5 py-1.5 text-sm font-medium text-brand shadow-sm hover:bg-brand hover:text-white">
-                    {t(label)}
-                  </button>
-                );
-              })}
+              {suggestions.map((s) => (
+                <button key={s.label} onClick={() => ask(s.send, s.match)} className="shrink-0 rounded-full border border-brand/30 bg-white px-3.5 py-1.5 text-sm font-medium text-brand shadow-sm hover:bg-brand hover:text-white">
+                  {s.label}
+                </button>
+              ))}
             </div>
           )}
           <form onSubmit={submit} className="flex items-center gap-2 rounded-full border border-line bg-white p-1.5 pl-5 shadow-xl shadow-black/5">
@@ -180,17 +240,18 @@ export default function GuideApp() {
               <input
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
+                maxLength={500}
                 placeholder={t("Ask anything about your visit…")}
                 className="w-full bg-transparent py-2 outline-none"
               />
             </label>
-            <button type="submit" disabled={!draft.trim()} className="grid h-11 w-11 place-items-center rounded-full bg-brand text-white transition hover:bg-brand-dark disabled:opacity-40" aria-label={t("Send")}>
+            <button type="submit" disabled={!draft.trim() || busy} className="grid h-11 w-11 place-items-center rounded-full bg-brand text-white transition hover:bg-brand-dark disabled:opacity-40" aria-label={t("Send")}>
               <ArrowUp className="h-5 w-5" />
             </button>
           </form>
-          <p className="flex items-center justify-center gap-1.5 py-2.5 text-center text-[11px] text-muted">
+          <p className="flex flex-wrap items-center justify-center gap-1.5 py-2.5 text-center text-[11px] text-muted">
             <Info className="h-3.5 w-3.5" />
-            {t("Preview with curated local notes. Confirm bookings on")}{" "}
+            {t("AI can make mistakes. Confirm bookings on")}{" "}
             <a href={OFFICIAL.ttdBooking} target="_blank" rel="noopener noreferrer" className="font-medium text-brand underline">TTD</a>
             <span aria-hidden="true">·</span>
             <a href={CONTACT.whatsapp} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium text-brand underline">
@@ -203,18 +264,61 @@ export default function GuideApp() {
   );
 }
 
-function Typing() {
+function Thinking() {
   const t = useT();
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setStep((s) => Math.min(s + 1, PROGRESS.length - 1)), 2600);
+    return () => clearInterval(id);
+  }, []);
   return (
-    <span className="flex gap-1 rounded-3xl rounded-bl-md bg-white px-4 py-3.5 shadow-sm" aria-label={t("IMC Guide is typing")}>
-      {[0, 150, 300].map((d) => (
-        <span key={d} className="h-1.5 w-1.5 animate-bounce rounded-full bg-ink/40" style={{ animationDelay: `${d}ms` }} />
-      ))}
+    <span className="flex items-center gap-3 rounded-3xl rounded-bl-md bg-white px-4 py-3 shadow-sm" role="status">
+      <span className="flex gap-1" aria-hidden="true">
+        {[0, 150, 300].map((d) => (
+          <span key={d} className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand/60" style={{ animationDelay: `${d}ms` }} />
+        ))}
+      </span>
+      <motion.span key={step} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-muted">{t(PROGRESS[step])}</motion.span>
     </span>
   );
 }
 
-function AnswerBubble({ a, onAsk }: { a: Answer; onAsk: (q: string, match?: string) => void }) {
+function AiBubble({ reply }: { reply: Extract<Reply, { kind: "ai" }> }) {
+  const t = useT();
+  const a = reply.answer;
+  return (
+    <div className="max-w-[88%] rounded-3xl rounded-bl-md border border-line bg-white p-4 shadow-sm sm:p-5">
+      <p className="font-semibold">{a.title}</p>
+      {a.points.length > 0 && (
+        <ul className="mt-2.5 space-y-2 text-[15px] text-ink/80">
+          {a.points.map((p) => (
+            <li key={p} className="flex gap-2.5"><Check className="mt-1 h-4 w-4 shrink-0 text-brand" />{p}</li>
+          ))}
+        </ul>
+      )}
+      {a.sources.length > 0 && (
+        <div className="mt-4 border-t border-line pt-3">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">{t("Sources")}</p>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {a.sources.map((s) => (
+              <a key={s.url} href={s.url} target="_blank" rel="noopener noreferrer" className="inline-flex max-w-full items-center gap-1 truncate rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium text-ink/80 hover:bg-brand-soft hover:text-brand">
+                {s.label} <ArrowUpRight className="h-3 w-3 shrink-0" />
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+      {!a.outOfScope && (
+        <p className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] text-emerald-700">
+          <BadgeCheck className="h-3.5 w-3.5" /> {t("Checked against sources")}
+          {reply.tools.length > 0 && <span className="text-muted">· {reply.tools.map((x) => t(TOOL_LABELS[x] ?? x)).join(" · ")}</span>}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function CuratedBubble({ a, offline }: { a: Answer; offline: boolean }) {
   const t = useT();
   return (
     <div className="max-w-[88%] rounded-3xl rounded-bl-md border border-line bg-white p-4 shadow-sm sm:p-5">
@@ -230,17 +334,10 @@ function AnswerBubble({ a, onAsk }: { a: Answer; onAsk: (q: string, match?: stri
         </a>
       )}
       {a.ask && <p className="mt-3 text-sm font-medium">{t(a.ask)}</p>}
-      {a.followUps && (
-        <div className="mt-2 flex flex-wrap gap-2">
-          {a.followUps.map((f) => {
-            const { label, prompt } = followUpPrompt(f);
-            return (
-              <button key={f} onClick={() => onAsk(t(prompt), prompt)} className="rounded-full border border-brand/30 px-3.5 py-1.5 text-sm font-medium text-brand hover:bg-brand-soft">
-                {t(label)}
-              </button>
-            );
-          })}
-        </div>
+      {offline && (
+        <p className="mt-3 flex items-center gap-1.5 text-[11px] text-muted">
+          <WifiOff className="h-3.5 w-3.5" /> {t("From IMC's saved local notes; the live guide is busy right now.")}
+        </p>
       )}
     </div>
   );
