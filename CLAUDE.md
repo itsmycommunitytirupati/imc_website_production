@@ -96,7 +96,14 @@ src/
   prasadam in event names, for respect.
 - Joining is via WhatsApp (`CONTACT.whatsapp`, prefilled text). There are no accounts; "Saved" lives
   in `localStorage` on the device.
-- Languages: English, Telugu and Hindi are selectable, but only English content exists. The guide says so.
+- **Languages: English, Telugu, Tamil, Hindi.** Every visitor-facing string goes through
+  `useT()` (`src/lib/i18n.ts`); dictionaries in `src/i18n/{te,ta,hi}.ts` are keyed by the English
+  text, and missing keys fall back to English. After changing any copy, run
+  `node scripts/check-i18n.mjs` (add `te --list` to see gaps) and translate the new keys in all
+  three files. Event names, venues and member quotes stay as written. The guide also matches
+  Telugu/Tamil/Hindi keywords (`NATIVE_KEYWORDS` in `content/guide.ts`). Headlines in Indic
+  scripts get extra line-height via `html:lang(..)` rules in `index.css`. The translations are
+  machine-quality: have native speakers review them before launch.
 - Photos: the hero is a South Indian family (Unsplash, credited in `media.ts`). Prefer IMC's own
   photos as they come in; keep `alt` text meaningful.
 
@@ -116,6 +123,16 @@ src/
   welcome. Visitor pages stay calm and practical.
 - The home page's example conversation is `site/ChatPreview.tsx`: a chat window that plays the
   exchange on scroll, and whose input opens the real guide.
+- Shared building blocks in `site/ui.tsx`: `LanguageMenu`, `HillsSilhouette` (seven-ridge
+  signature used in heroes and the footer), `PageHero` (photo header for inner pages), the
+  scroll-aware `Header`, full-screen `MobileMenu` (rendered outside the header because its
+  backdrop blur would trap a fixed overlay), and the dark `Footer`.
+- Home signature pieces: live Telugu greeting by Tirupati time (`content/hills.ts`) and the
+  interactive "Seven hills. One welcome." section. Visitor guide: sticky topic bar with
+  scroll-spy, "Your journey up the hills" timeline, "Free on the hill". Experiences: "This week's
+  pick", grouping by This week / Next week / Coming up. Guide: hills banner, topic cards,
+  thinking indicator, follow-up chips above the composer.
+- Pages other than Home load on demand (`React.lazy` in `App.tsx`).
 - Photos: put originals in `assets/`, run `node scripts/optimize-photos.mjs`, and use the WebP
   copies via `content/photos.ts`. Never ship the 2 MB originals to a page.
 - Motion: wrap sections in `site/Reveal.tsx` (fade-up on scroll; respects reduced motion). Cards

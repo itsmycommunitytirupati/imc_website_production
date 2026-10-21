@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Caveat:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Caveat:wght@600;700&family=Noto+Sans+Telugu:wght@400;600;800&family=Noto+Sans+Tamil:wght@400;600;800&family=Noto+Sans+Devanagari:wght@400;600;800&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Plus Jakarta Sans", "Inter", ui-sans-serif, sans-serif;
+  --font-sans: "Inter", "Noto Sans Telugu", "Noto Sans Tamil", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Noto Sans Telugu", "Noto Sans Tamil", "Noto Sans Devanagari", "Inter", ui-sans-serif, sans-serif;
   --font-hand: "Caveat", "Comic Sans MS", cursive;
 
   /* IMC visitor-first palette: saffron brand on warm cream. */
@@ -32,7 +32,7 @@
 }
 
 html {
-  scroll-padding-top: 88px;
+  scroll-padding-top: 150px;
 }
 
 body {
@@ -65,4 +65,11 @@ a,
 .hover-pause:hover .animate-marquee-slow { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee, .animate-marquee-slow, .animate-wall-up, .animate-wall-down, .animate-float { animation: none; }
+}
+
+/* Telugu, Tamil and Hindi need room for vowel signs and longer words in headlines. */
+html:is(:lang(te), :lang(ta), :lang(hi)) :is(h1, h2, h3, .font-display) {
+  letter-spacing: 0;
+  line-height: 1.32;
+  overflow-wrap: break-word;
 }

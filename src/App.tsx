@@ -1,15 +1,19 @@
-import { useLocation, navigate } from "./lib/router";
-import { SiteShell } from "./site/ui";
+import { lazy, Suspense } from "react";
+import { Link, useLocation, navigate } from "./lib/router";
+import { useT } from "./lib/i18n";
+import { GopuramIcon, SiteShell } from "./site/ui";
 import HomePage from "./site/HomePage";
-import CommunityPage from "./site/CommunityPage";
-import ExperiencesPage from "./site/ExperiencesPage";
-import VisitorGuidePage from "./site/VisitorGuidePage";
-import SavedPage from "./site/SavedPage";
-import GuideApp from "./guide/GuideApp";
-import AdminApp from "./admin/AdminApp";
-import LegalPage from "./components/LegalPage";
 import MaintenancePage from "./components/Maintenance";
 import { IS_MAINTENANCE } from "./config/Maintenance";
+
+// Everything but the home page loads on demand, so the first visit stays fast.
+const CommunityPage = lazy(() => import("./site/CommunityPage"));
+const ExperiencesPage = lazy(() => import("./site/ExperiencesPage"));
+const VisitorGuidePage = lazy(() => import("./site/VisitorGuidePage"));
+const SavedPage = lazy(() => import("./site/SavedPage"));
+const GuideApp = lazy(() => import("./guide/GuideApp"));
+const AdminApp = lazy(() => import("./admin/AdminApp"));
+const LegalPage = lazy(() => import("./components/LegalPage"));
 
 // One build serves three surfaces. The hostname picks the surface in
 // production; /guide and /admin let previews and workers.dev reach them too.
@@ -26,20 +30,32 @@ function surfaceFor(host: string, path: string): Surface {
   return "site";
 }
 
+function Loading() {
+  return (
+    <div className="grid min-h-[60vh] place-items-center" role="status" aria-label="Loading">
+      <GopuramIcon className="h-10 w-10 animate-pulse text-brand" />
+    </div>
+  );
+}
+
 export default function App() {
   const { path } = useLocation();
   if (IS_MAINTENANCE) return <MaintenancePage />;
 
   const surface = surfaceFor(window.location.hostname, path);
-  if (surface === "guide") return <GuideApp />;
-  if (surface === "admin") return <AdminApp />;
-
-  // The legal page keeps its own full-page layout from the previous site.
-  if (path === "/privacy" || path === "/terms") return <LegalPage onBack={() => navigate("/")} />;
+  if (surface !== "site" || path === "/privacy" || path === "/terms") {
+    return (
+      <Suspense fallback={<Loading />}>
+        {surface === "guide" ? <GuideApp /> : surface === "admin" ? <AdminApp /> : <LegalPage onBack={() => navigate("/")} />}
+      </Suspense>
+    );
+  }
 
   return (
     <SiteShell>
-      <SitePage path={path} />
+      <Suspense fallback={<Loading />}>
+        <SitePage path={path} />
+      </Suspense>
     </SiteShell>
   );
 }
@@ -62,11 +78,14 @@ function SitePage({ path }: { path: string }) {
 }
 
 function NotFound() {
+  const t = useT();
   return (
     <section className="mx-auto max-w-xl px-4 py-24 text-center">
-      <p className="font-display text-6xl font-extrabold text-brand">404</p>
-      <h1 className="mt-3 font-display text-2xl font-bold">This page took a different ghat road.</h1>
-      <a href="/" className="mt-6 inline-block rounded-lg bg-brand px-5 py-2.5 font-semibold text-white">Back home</a>
+      <GopuramIcon className="mx-auto h-16 w-16 text-brand" />
+      <p className="mt-6 font-display text-7xl font-extrabold tracking-tighter text-brand">404</p>
+      <h1 className="mt-3 font-display text-2xl font-bold">{t("This page took a different ghat road.")}</h1>
+      <p className="mt-2 text-muted">{t("Let's get you back on the right path.")}</p>
+      <Link to="/" className="mt-8 inline-flex rounded-full bg-ink px-6 py-3 font-semibold text-white hover:bg-brand">{t("Back home")}</Link>
     </section>
   );
 }

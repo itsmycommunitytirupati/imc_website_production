@@ -26,12 +26,13 @@ export function guideUrl(question?: string, lang?: Lang) {
   return qs ? `${GUIDE_BASE}?${qs}` : GUIDE_BASE;
 }
 
-export type Lang = "en" | "te" | "hi";
+export type Lang = "en" | "te" | "ta" | "hi";
 
-export const LANGS: { id: Lang; label: string }[] = [
-  { id: "en", label: "English" },
-  { id: "te", label: "తెలుగు" },
-  { id: "hi", label: "हिन्दी" },
+export const LANGS: { id: Lang; label: string; name: string }[] = [
+  { id: "en", label: "English", name: "English" },
+  { id: "te", label: "తెలుగు", name: "Telugu" },
+  { id: "ta", label: "தமிழ்", name: "Tamil" },
+  { id: "hi", label: "हिन्दी", name: "Hindi" },
 ];
 
 const LANG_KEY = "imc-lang";
@@ -40,7 +41,7 @@ const LANG_EVENT = "imc-lang-change";
 function readLang(): Lang {
   try {
     const v = localStorage.getItem(LANG_KEY);
-    if (v === "te" || v === "hi") return v;
+    if (v === "te" || v === "ta" || v === "hi") return v;
   } catch {
     // Storage can be blocked (private mode); English is a fine default.
   }
@@ -49,6 +50,9 @@ function readLang(): Lang {
 
 export function useLang(): [Lang, (l: Lang) => void] {
   const [lang, setLangState] = useState<Lang>(readLang);
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
   useEffect(() => {
     const sync = () => setLangState(readLang());
     window.addEventListener(LANG_EVENT, sync);

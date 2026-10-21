@@ -9,6 +9,7 @@ import { TESTIMONIALS } from "../data";
 import { joinLink } from "./ExperienceCard";
 import { GopuramIcon, Logo } from "./ui";
 import Reveal from "./Reveal";
+import { useT } from "../lib/i18n";
 
 // Community hub for a younger crowd, in the spirit of communitie.in: big
 // playful type, real photos everywhere, and every path ending in a hello on WhatsApp.
@@ -62,6 +63,7 @@ function Marker({ children }: { children: ReactNode }) {
 }
 
 function Hero() {
+  const t = useT();
   return (
     <section className="dot-grid relative overflow-hidden">
       {POLAROIDS.map((p, i) => (
@@ -72,25 +74,25 @@ function Hero() {
       ))}
       <div className="relative mx-auto max-w-4xl px-4 pb-14 pt-16 text-center sm:pt-24">
         <p className="inline-block -rotate-3 rounded-full bg-turmeric px-4 py-1.5 text-sm font-bold shadow-sm">
-          రండి! <span className="font-medium">Randi, come along</span> 👋
+          రండి! <span className="font-medium">{t("Randi, come along")}</span> 👋
         </p>
         <h1 className="mt-6 font-display text-[2.6rem] font-extrabold leading-[1.02] tracking-[-0.04em] sm:text-6xl lg:text-7xl">
-          When did you last do something <Marker>for the first time?</Marker>
+          {t("When did you last do something")} <Marker>{t("for the first time?")}</Marker>
         </h1>
-        <p className="mx-auto mt-6 max-w-xl text-lg text-muted sm:text-xl">Discover something new in Tirupati. Find people who get you.</p>
+        <p className="mx-auto mt-6 max-w-xl text-lg text-muted sm:text-xl">{t("Discover something new in Tirupati. Find people who get you.")}</p>
         <div className="mt-9 flex flex-wrap justify-center gap-3">
           <Link to="/experiences" className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-brand">
-            Explore experiences <ArrowUpRight className="h-4 w-4" />
+            {t("Explore experiences")} <ArrowUpRight className="h-4 w-4" />
           </Link>
           <a href="#clubs" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold shadow-md ring-1 ring-ink/10 transition hover:-translate-y-0.5">
-            Find a club <ArrowUpRight className="h-4 w-4" />
+            {t("Find a club")} <ArrowUpRight className="h-4 w-4" />
           </a>
           <a href="#get-involved" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold shadow-md ring-1 ring-ink/10 transition hover:-translate-y-0.5">
-            Host with us <ArrowUpRight className="h-4 w-4" />
+            {t("Host with us")} <ArrowUpRight className="h-4 w-4" />
           </a>
         </div>
         <a href="#welcome" className="mt-14 inline-flex flex-col items-center gap-1 text-xs font-medium text-muted">
-          Keep exploring <ArrowDown className="h-4 w-4 animate-bounce" />
+          {t("Keep exploring")} <ArrowDown className="h-4 w-4 animate-bounce" />
         </a>
       </div>
     </section>
@@ -98,10 +100,11 @@ function Hero() {
 }
 
 function Ticker() {
+  const t = useT();
   const items = EXPERIENCES.slice(0, 8).map((e) => `${POSTER_STYLES[e.category].emoji} ${e.title} · ${e.recurring ?? formatDate(e.date)}`);
   const row = [...items, ...items];
   return (
-    <div className="overflow-hidden bg-ink py-3 text-sm font-semibold text-white" aria-label="Coming up at IMC">
+    <div className="overflow-hidden bg-ink py-3 text-sm font-semibold text-white" aria-label={t("Coming up at IMC")}>
       <div className="animate-marquee flex w-max gap-8 whitespace-nowrap">
         {row.map((t, i) => (
           <span key={i} className="flex items-center gap-8">
@@ -116,6 +119,7 @@ function Ticker() {
 /* ---------------------------------------------------------- photo wall */
 
 function PhotoWall() {
+  const t = useT();
   const cols = [0, 1, 2, 3, 4].map((c) => WALL.filter((_, i) => i % 5 === c));
   return (
     <section id="welcome" className="relative h-[640px] overflow-hidden bg-black md:h-[780px]">
@@ -133,14 +137,14 @@ function PhotoWall() {
       <div className="absolute inset-0 bg-gradient-to-b from-black via-black/35 to-black" />
       <div className="absolute inset-0 grid place-items-center px-4 text-center text-white">
         <Reveal>
-          <p className="font-display text-3xl font-extrabold tracking-tight sm:text-5xl">Welcome to</p>
+          <p className="font-display text-3xl font-extrabold tracking-tight sm:text-5xl">{t("Welcome to")}</p>
           <p className="font-display text-[30vw] font-extrabold leading-[0.85] tracking-[-0.06em] sm:text-[11rem] lg:text-[14rem]">
             IMC<span className="text-brand">.</span>
           </p>
           <p className="mt-3 text-lg font-medium sm:text-2xl">/ it's · my · community /</p>
-          <p className="mx-auto mt-4 max-w-md text-white/70">Tirupati's people-first community. Real people, real meetups, every week.</p>
+          <p className="mx-auto mt-4 max-w-md text-white/70">{t("Tirupati's people-first community. Real people, real meetups, every week.")}</p>
           <div className="mt-6 flex flex-wrap justify-center gap-2">
-            {["50+ clubs", "700+ events a year", "40k+ members"].map((s) => (
+            {[t("50+ clubs"), t("700+ events a year"), t("40k+ members")].map((s) => (
               <span key={s} className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold ring-1 ring-white/20 backdrop-blur">{s}</span>
             ))}
           </div>
@@ -153,16 +157,17 @@ function PhotoWall() {
 /* --------------------------------------------------------------- tribes */
 
 function ClubCard({ g }: { g: (typeof CLUB_GROUPS)[number] }) {
+  const t = useT();
   return (
     <div className="group relative aspect-[4/3] overflow-hidden rounded-[28px] shadow-[0_18px_40px_-18px_rgba(0,0,0,0.45)] ring-4 ring-white">
       <img src={g.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 p-5">
-        <h3 className="font-display text-2xl font-extrabold text-white drop-shadow sm:text-3xl">{g.title}</h3>
+        <h3 className="font-display text-2xl font-extrabold text-white drop-shadow sm:text-3xl">{t(g.title)}</h3>
         <div className="mt-3 flex flex-wrap gap-1.5 transition-all duration-300 lg:max-h-0 lg:opacity-0 lg:group-focus-within:max-h-40 lg:group-focus-within:opacity-100 lg:group-hover:max-h-40 lg:group-hover:opacity-100">
           {g.clubs.map((c) => (
             <a key={c} href={wa(`Hi IMC! I'd like to join the ${c} club.`)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-turmeric">
-              <Plus className="h-3 w-3" /> {c}
+              <Plus className="h-3 w-3" /> {t(c)}
             </a>
           ))}
         </div>
@@ -172,22 +177,23 @@ function ClubCard({ g }: { g: (typeof CLUB_GROUPS)[number] }) {
 }
 
 function Tribes() {
+  const t = useT();
   const before = CLUB_GROUPS.slice(0, 4);
   const after = CLUB_GROUPS.slice(4);
   return (
     <section id="clubs" className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
       <Reveal className="text-center">
-        <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">Find your tribe.</h2>
-        <p className="mx-auto mt-4 max-w-xl text-lg text-muted">Eight circles, 50+ clubs. Hover a circle (or tap on your phone) and say hi to the one that feels like you.</p>
+        <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">{t("Find your tribe.")}</h2>
+        <p className="mx-auto mt-4 max-w-xl text-lg text-muted">{t("Eight circles, 50+ clubs. Hover a circle (or tap on your phone) and say hi to the one that feels like you.")}</p>
       </Reveal>
       <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {before.map((g) => <ClubCard key={g.title} g={g} />)}
         <div className="flex aspect-[4/3] flex-col items-center justify-center gap-4 rounded-[28px] bg-white p-6 text-center shadow-[0_18px_40px_-18px_rgba(0,0,0,0.25)] ring-4 ring-white">
           <div className="scale-150"><Logo /></div>
           <a href={wa("Hi IMC! Which clubs can I join?")} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 font-semibold text-white transition hover:bg-brand">
-            All clubs <ArrowUpRight className="h-4 w-4" />
+            {t("All clubs")} <ArrowUpRight className="h-4 w-4" />
           </a>
-          <p className="font-hand text-2xl text-muted">Let's go, randi! 🎢</p>
+          <p className="font-hand text-2xl text-muted">{t("Let's go, randi! 🎢")}</p>
         </div>
         {after.map((g) => <ClubCard key={g.title} g={g} />)}
       </div>
@@ -198,6 +204,7 @@ function Tribes() {
 /* ---------------------------------------------------------- experiences */
 
 function Poster({ e, className = "", style }: { e: Experience; className?: string; style?: CSSProperties }) {
+  const t = useT();
   const p = POSTER_STYLES[e.category];
   const [weekday, day, month] = new Date(e.date + "T00:00:00")
     .toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })
@@ -227,8 +234,8 @@ function Poster({ e, className = "", style }: { e: Experience; className?: strin
           <p className="mt-1 font-display text-2xl font-extrabold uppercase leading-[0.95] tracking-tight">{e.title}</p>
           <p className="mt-2 text-xs opacity-80">{e.venue}</p>
           <div className="mt-3 flex items-center justify-between">
-            <span className="rounded-full px-2.5 py-1 text-xs font-bold" style={{ background: p.accent, color: p.bg }}>{e.price}</span>
-            <span className="text-xs font-semibold underline-offset-4 group-hover/poster:underline">I'm in →</span>
+            <span className="rounded-full px-2.5 py-1 text-xs font-bold" style={{ background: p.accent, color: p.bg }}>{t(e.price)}</span>
+            <span className="text-xs font-semibold underline-offset-4 group-hover/poster:underline">{t("I'm in")} →</span>
           </div>
         </div>
       </div>
@@ -237,22 +244,23 @@ function Poster({ e, className = "", style }: { e: Experience; className?: strin
 }
 
 function ExperiencesFan() {
+  const t = useT();
   const fan = EXPERIENCES.slice(0, 7);
   const mid = (fan.length - 1) / 2;
   return (
     <section className="px-3 py-6 sm:px-6">
       <div className="mx-auto max-w-7xl overflow-hidden rounded-[40px] bg-white px-4 py-16 text-center sm:px-10">
         <Reveal>
-          <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">Experiences, together.</h2>
+          <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">{t("Experiences, together.")}</h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted">
-            From sunrise runs at Alipiri to starlit camps on Horsley Hills, there's always something on. Here's what's coming up.
+            {t("From sunrise runs at Alipiri to starlit camps on Horsley Hills, there's always something on. Here's what's coming up.")}
           </p>
           <div className="relative mt-8 inline-flex items-center">
             <Link to="/experiences" className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 font-semibold text-white shadow-lg transition hover:bg-brand">
-              Explore experiences <ArrowUpRight className="h-4 w-4" />
+              {t("Explore experiences")} <ArrowUpRight className="h-4 w-4" />
             </Link>
             <span className="absolute left-full ml-5 hidden w-56 -rotate-3 text-left font-hand text-2xl leading-tight text-muted lg:block">
-              ← psst… most people come alone the first time 👀
+              ← {t("psst… most people come alone the first time 👀")}
             </span>
           </div>
         </Reveal>
@@ -298,27 +306,28 @@ function ChatLine({ me, children }: { me?: boolean; children: ReactNode }) {
 }
 
 function WhatsAppPocket() {
+  const t = useT();
   const hero = EXPERIENCES[0];
   return (
     <section className="px-3 py-6 sm:px-6">
       <div className="mx-auto grid max-w-7xl items-center gap-12 overflow-hidden rounded-[40px] bg-ink px-6 py-14 text-white sm:px-12 lg:grid-cols-2">
         <Reveal>
-          <p className="text-white/60">Still thinking about that first question?</p>
+          <p className="text-white/60">{t("Still thinking about that first question?")}</p>
           <h2 className="mt-3 font-display text-4xl font-extrabold leading-[1.02] tracking-[-0.03em] sm:text-6xl">
-            Your next first time is one message away.
+            {t("Your next first time is one message away.")}
           </h2>
           <p className="mt-5 max-w-lg text-lg text-white/70">
-            Say hi on WhatsApp and we'll add you to the clubs you like. Every plan, poll and photo lands right there, so all you do is show up.
+            {t("Say hi on WhatsApp and we'll add you to the clubs you like. Every plan, poll and photo lands right there, so all you do is show up.")}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a href={wa("Hi IMC! I'd like to join the community 👋")} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold text-ink transition hover:bg-turmeric">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" /> Say hi on WhatsApp <ArrowUpRight className="h-4 w-4" />
+              <span className="h-2 w-2 rounded-full bg-emerald-500" /> {t("Say hi on WhatsApp")} <ArrowUpRight className="h-4 w-4" />
             </a>
             <a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 font-semibold ring-1 ring-white/30 transition hover:bg-white/10">
               <Instagram className="h-4 w-4" /> @imc.tirupati
             </a>
           </div>
-          <p className="mt-6 font-hand text-2xl text-white/60">Faster than deciding which dosa to order 👀</p>
+          <p className="mt-6 font-hand text-2xl text-white/60">{t("Faster than deciding which dosa to order 👀")}</p>
         </Reveal>
 
         <Reveal delay={0.15} className="mx-auto">
@@ -362,26 +371,27 @@ function WhatsAppPocket() {
 /* --------------------------------------------------------------- passion */
 
 function Passion() {
+  const t = useT();
   const tilt = ["-rotate-3", "rotate-2 md:mt-12", "-rotate-2 md:mt-4"];
   return (
     <section id="get-involved" className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
       <Reveal className="text-center">
-        <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">Your passion, our platform.</h2>
+        <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">{t("Your passion, our platform.")}</h2>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted">
-          Got an idea for a club, a space that could host the next meetup, or a skill the city should see? Let's build it together.
+          {t("Got an idea for a club, a space that could host the next meetup, or a skill the city should see? Let's build it together.")}
         </p>
       </Reveal>
       <div className="mt-14 grid items-start gap-12 md:grid-cols-3 md:gap-8">
         {PASSION_CARDS.map((c, i) => (
           <Reveal key={c.title} delay={i * 0.1} className={tilt[i]}>
-            <p className="mb-3 text-center font-hand text-2xl">{c.note}</p>
+            <p className="mb-3 text-center font-hand text-2xl">{t(c.note)}</p>
             <div className="rounded-[28px] bg-white p-3 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.35)] transition hover:rotate-0">
               <img src={c.image} alt="" loading="lazy" className="aspect-[4/3] w-full rounded-[20px] object-cover" />
               <div className="p-3">
-                <h3 className="font-display text-2xl font-extrabold">{c.title}</h3>
-                <p className="mt-2 text-muted">{c.text}</p>
+                <h3 className="font-display text-2xl font-extrabold">{t(c.title)}</h3>
+                <p className="mt-2 text-muted">{t(c.text)}</p>
                 <a href={PASSION_LINKS[c.action]} target="_blank" rel="noopener noreferrer" className="mt-5 flex items-center justify-center gap-2 rounded-full bg-ink py-3 font-semibold text-white transition hover:bg-brand">
-                  {c.cta} <ArrowUpRight className="h-4 w-4" />
+                  {t(c.cta)} <ArrowUpRight className="h-4 w-4" />
                 </a>
               </div>
             </div>
@@ -413,6 +423,7 @@ function Post({ src, likes, className }: { src: string; likes: string; className
 }
 
 function Social() {
+  const t = useT();
   return (
     <section className="px-3 py-6 sm:px-6">
       <div className="mx-auto grid max-w-7xl items-center gap-10 overflow-hidden rounded-[40px] bg-white px-6 py-14 sm:px-12 lg:grid-cols-2">
@@ -421,17 +432,17 @@ function Social() {
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-tr from-amber-400 via-brand to-fuchsia-600 text-white"><Instagram className="h-5 w-5" /></span>
             imc.tirupati
           </a>
-          <h2 className="mt-6 font-display text-4xl font-extrabold leading-[1.02] tracking-[-0.03em] sm:text-6xl">Your social circle, a tap away.</h2>
-          <p className="mt-5 max-w-md text-lg text-muted">Club moments, behind-the-scenes chaos and the photos everyone asks for. Follow along and be part of the story.</p>
+          <h2 className="mt-6 font-display text-4xl font-extrabold leading-[1.02] tracking-[-0.03em] sm:text-6xl">{t("Your social circle, a tap away.")}</h2>
+          <p className="mt-5 max-w-md text-lg text-muted">{t("Club moments, behind-the-scenes chaos and the photos everyone asks for. Follow along and be part of the story.")}</p>
           <a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 font-semibold text-white transition hover:bg-brand">
-            Follow us <ArrowUpRight className="h-4 w-4" />
+            {t("Follow us")} <ArrowUpRight className="h-4 w-4" />
           </a>
         </Reveal>
         <div className="relative h-[400px]">
           <Post src={IMC_PHOTOS.outdoorSelfie} likes="moments" className="left-[2%] top-10 -rotate-6" />
           <Post src={IMC_PHOTOS.waterfall} likes="memories" className="left-[30%] top-0 z-10 rotate-3" />
           <Post src={IMC_PHOTOS.festiveMeetup} likes="friends" className="right-[0%] top-16 hidden rotate-[8deg] sm:block" />
-          <p className="absolute bottom-0 left-4 z-20 -rotate-2 font-hand text-2xl">Is that you in the picture? 👀</p>
+          <p className="absolute bottom-0 left-4 z-20 -rotate-2 font-hand text-2xl">{t("Is that you in the picture? 👀")}</p>
         </div>
       </div>
     </section>
@@ -441,12 +452,13 @@ function Social() {
 /* ---------------------------------------------------------------- voices */
 
 function Voices() {
+  const t = useT();
   const row = [...TESTIMONIALS, ...TESTIMONIALS];
   return (
     <section className="hover-pause overflow-hidden py-20">
       <Reveal className="px-4 text-center">
-        <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">Heard around the club.</h2>
-        <p className="mt-4 text-lg text-muted">From the captains and crew who make IMC happen.</p>
+        <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">{t("Heard around the club.")}</h2>
+        <p className="mt-4 text-lg text-muted">{t("From the captains and crew who make IMC happen.")}</p>
       </Reveal>
       <div className="mt-12 flex w-max animate-marquee-slow gap-5">
         {row.map((t, i) => (
@@ -469,26 +481,27 @@ function Voices() {
 /* ------------------------------------------------------------------- faq */
 
 function Faq() {
+  const t = useT();
   return (
     <section className="mx-auto grid max-w-7xl gap-10 px-4 pb-20 sm:px-6 lg:grid-cols-[1fr_1.4fr]">
       <Reveal>
-        <h2 className="font-display text-5xl font-extrabold leading-[1] tracking-[-0.04em] sm:text-6xl">Frequently asked questions</h2>
-        <p className="mt-4 text-lg text-muted">Everything you need to know before your first meetup.</p>
-        <p className="mt-8 font-hand text-2xl">Still curious? Just ask 👇</p>
+        <h2 className="font-display text-5xl font-extrabold leading-[1] tracking-[-0.04em] sm:text-6xl">{t("Frequently asked questions")}</h2>
+        <p className="mt-4 text-lg text-muted">{t("Everything you need to know before your first meetup.")}</p>
+        <p className="mt-8 font-hand text-2xl">{t("Still curious? Just ask 👇")}</p>
         <a href={wa("Hi IMC! I have a question.")} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 font-semibold text-white transition hover:bg-brand">
-          <MessageCircle className="h-4 w-4" /> Ask on WhatsApp
+          <MessageCircle className="h-4 w-4" /> {t("Ask on WhatsApp")}
         </a>
       </Reveal>
       <Reveal delay={0.1} className="divide-y divide-line overflow-hidden rounded-3xl bg-white shadow-sm">
         {FAQS.map((f) => (
           <details key={f.q} className="group p-6">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-semibold">
-              {f.q}
+              {t(f.q)}
               <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-paper transition group-open:rotate-45 group-open:bg-turmeric">
                 <Plus className="h-4 w-4" />
               </span>
             </summary>
-            <p className="mt-3 text-muted">{f.a}</p>
+            <p className="mt-3 text-muted">{t(f.a)}</p>
           </details>
         ))}
       </Reveal>
@@ -499,19 +512,20 @@ function Faq() {
 /* --------------------------------------------------------------- see you */
 
 function SeeYou() {
+  const t = useT();
   return (
     <section className="relative overflow-hidden bg-brand px-4 py-20 text-center text-white">
       <GopuramIcon className="pointer-events-none absolute -bottom-10 -left-10 h-72 w-72 text-white/10" />
       <GopuramIcon className="pointer-events-none absolute -right-8 -top-8 h-56 w-56 text-white/10" />
       <Reveal className="relative">
-        <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">See you this Sunday? 👋</h2>
-        <p className="mx-auto mt-4 max-w-lg text-lg text-white/85">Pick a club, pick an experience, or just say hi. Your first time is on us to make easy.</p>
+        <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">{t("See you this Sunday? 👋")}</h2>
+        <p className="mx-auto mt-4 max-w-lg text-lg text-white/85">{t("Pick a club, pick an experience, or just say hi. Your first time is on us to make easy.")}</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link to="/experiences" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold text-ink transition hover:bg-turmeric">
-            Explore experiences <ArrowUpRight className="h-4 w-4" />
+            {t("Explore experiences")} <ArrowUpRight className="h-4 w-4" />
           </Link>
           <a href={wa("Hi IMC! 👋")} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 font-semibold ring-1 ring-white/50 transition hover:bg-white/10">
-            Say hi on WhatsApp <ArrowUpRight className="h-4 w-4" />
+            {t("Say hi on WhatsApp")} <ArrowUpRight className="h-4 w-4" />
           </a>
         </div>
       </Reveal>

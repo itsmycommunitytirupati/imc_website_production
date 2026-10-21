@@ -158,3 +158,21 @@ export const DISTANCES = [
   { place: "Chandragiri Fort", value: "about 15 km" },
   { place: "Sri Kalahasti", value: "about 35 km" },
 ];
+
+// Visitor guide: the usual flow of a Tirumala visit, start to finish.
+export const JOURNEY = [
+  { title: "Arrive in Tirupati", text: "By train, bus, or a flight into Renigunta." },
+  { title: "Reach Alipiri", text: "The foot of the hills, where vehicles and bags are checked." },
+  { title: "Go up the hills", text: "By bus or cab on the ghat road, or on foot." },
+  { title: "Settle in at Tirumala", text: "Check in, deposit phones and bags, freshen up." },
+  { title: "Darshan", text: "At your booked slot, in traditional clothes." },
+  { title: "Annaprasadam", text: "A free meal, served to every pilgrim." },
+  { title: "Back down and beyond", text: "Tiruchanur, Kapila Theertham, or an IMC evening." },
+];
+
+export const FREE_ON_THE_HILL = [
+  { title: "Free meals", text: "Annaprasadam for every pilgrim" },
+  { title: "Free buses", text: "Between the main stops on the hill" },
+  { title: "Free luggage", text: "Sent up from Alipiri for walkers" },
+  { title: "Free deposit counters", text: "For phones, cameras and bags" },
+];

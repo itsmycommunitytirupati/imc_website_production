@@ -170,6 +170,20 @@ const ENTRIES: Record<string, Entry> = {
   },
 };
 
+// Words visitors type in Telugu, Tamil and Hindi, matched alongside the English keywords.
+const NATIVE_KEYWORDS: Record<string, string[]> = {
+  darshan: ["దర్శనం", "దర్శన", "தரிசனம்", "दर्शन"],
+  dress: ["దుస్తులు", "உடை", "कपड़े", "पोशाक"],
+  parking: ["పార్కింగ్", "பார்க்கிங்", "पार्किंग"],
+  transport: ["బస్సు", "బస్", "రైలు", "స్టేషన్", "பேருந்து", "ரயில்", "बस", "ट्रेन", "स्टेशन"],
+  stay: ["హోటల్", "గది", "ஹோட்டல்", "அறை", "होटल", "कमरा"],
+  food: ["భోజనం", "అన్నప్రసాదం", "టిఫిన్", "உணவு", "சாப்பாடு", "खाना", "भोजन", "अन्नप्रसाद"],
+  walk: ["నడక", "మెట్లు", "అలిపిరి", "நடை", "படி", "पैदल", "सीढ़ी"],
+  elderly: ["పెద్దవాళ్ళు", "వృద్ధులు", "முதியோர்", "பெற்றோர்", "बुजुर्ग", "माता-पिता"],
+  kids: ["పిల్లలు", "குழந்தை", "बच्चे"],
+  nearby: ["ప్రదేశాలు", "చూడదగిన", "இடங்கள்", "आसपास", "घूमने"],
+};
+
 const FOLLOW_UP_PROMPTS: Record<FollowUp, { label: string; prompt: string }> = {
   transport: { label: "Transport", prompt: "How do we get around and up to Tirumala?" },
   "day-plan": { label: "Day plan", prompt: "Suggest a relaxed day plan around Tirupati" },
@@ -210,8 +224,9 @@ export function answerFor(question: string): Answer {
   const q = question.toLowerCase();
   if (/(day plan|itinerary|plan (a|my|our) day|one day|relaxed day)/.test(q)) return DAY_PLAN;
   let best: { score: number; answer: Answer } | null = null;
-  for (const entry of Object.values(ENTRIES)) {
-    const score = entry.keywords.reduce((s, k) => (q.includes(k) ? s + 1 : s), 0);
+  for (const [key, entry] of Object.entries(ENTRIES)) {
+    const words = [...entry.keywords, ...(NATIVE_KEYWORDS[key] ?? [])];
+    const score = words.reduce((s, k) => (q.includes(k) ? s + 1 : s), 0);
     if (score > 0 && (!best || score > best.score)) best = { score, answer: entry.answer };
   }
   return best?.answer ?? FALLBACK;

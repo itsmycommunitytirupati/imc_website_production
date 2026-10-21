@@ -4,6 +4,7 @@ import { ArrowUp, ArrowUpRight, Bus, CalendarDays, Check, CheckCheck } from "luc
 import { Link, navigate } from "../lib/router";
 import { guideUrl, useLang } from "../lib/site";
 import { answerFor, followUpPrompt } from "../content/guide";
+import { useT } from "../lib/i18n";
 
 // Home page "example conversation", drawn as a live chat window. It plays the
 // exchange once when scrolled into view, and its input opens the real guide.
@@ -22,6 +23,7 @@ const bubble = { initial: { opacity: 0, y: 8, scale: 0.98 }, animate: { opacity:
 
 export default function ChatPreview() {
   const [lang] = useLang();
+  const t = useT();
   const a = answerFor(QUESTION);
   const reduce = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
@@ -54,18 +56,18 @@ export default function ChatPreview() {
           <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-brand bg-emerald-400" />
         </span>
         <span className="flex-1 leading-tight">
-          <span className="block font-semibold">IMC Guide</span>
-          <span className="text-xs text-white/80">Online · answers in seconds</span>
+          <span className="block font-semibold">{t("IMC Guide")}</span>
+          <span className="text-xs text-white/80">{t("Online · answers in seconds")}</span>
         </span>
-        <span className="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider">Example</span>
+        <span className="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider">{t("Example")}</span>
       </div>
 
       <div className="dot-grid min-h-[330px] flex-1 space-y-3 bg-[#fbf6f0] px-3 py-4">
-        <p className="mx-auto w-fit rounded-full bg-white/80 px-2.5 py-0.5 text-[10px] font-medium text-muted shadow-sm">Today</p>
+        <p className="mx-auto w-fit rounded-full bg-white/80 px-2.5 py-0.5 text-[10px] font-medium text-muted shadow-sm">{t("Today")}</p>
 
         {stage >= 1 && (
           <motion.div {...bubble} className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-md bg-brand px-3.5 py-2 text-sm text-white shadow-sm">
-            {QUESTION}
+            {t(QUESTION)}
             <span className="mt-0.5 flex items-center justify-end gap-1 text-[10px] text-white/75">
               9:41 <CheckCheck className="h-3 w-3" />
             </span>
@@ -75,7 +77,7 @@ export default function ChatPreview() {
         {stage === 2 && (
           <motion.div {...bubble} className="flex items-end gap-2">
             <span className="grid h-7 w-7 place-items-center rounded-full bg-peach text-[8px] font-extrabold text-brand">IMC</span>
-            <span className="flex gap-1 rounded-2xl rounded-bl-md bg-white px-3.5 py-3 shadow-sm" aria-label="IMC Guide is typing">
+            <span className="flex gap-1 rounded-2xl rounded-bl-md bg-white px-3.5 py-3 shadow-sm" aria-label={t("IMC Guide is typing")}>
               {[0, 150, 300].map((d) => (
                 <span key={d} className="h-1.5 w-1.5 animate-bounce rounded-full bg-ink/40" style={{ animationDelay: `${d}ms` }} />
               ))}
@@ -87,18 +89,18 @@ export default function ChatPreview() {
           <motion.div {...bubble} className="flex items-end gap-2">
             <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-peach text-[8px] font-extrabold text-brand">IMC</span>
             <div className="max-w-[88%] rounded-2xl rounded-bl-md bg-white px-3.5 py-3 text-sm shadow-sm">
-              <p className="font-semibold">{a.title}</p>
+              <p className="font-semibold">{t(a.title)}</p>
               <ul className="mt-2 space-y-1.5 text-muted">
                 {a.points.map((p) => (
-                  <li key={p} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-brand" />{p}</li>
+                  <li key={p} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-brand" />{t(p)}</li>
                 ))}
               </ul>
               {a.officialLink && (
                 <a href={a.officialLink.url} target="_blank" rel="noopener noreferrer" className="mt-2.5 inline-flex items-center gap-1 text-xs font-medium text-brand underline underline-offset-4">
-                  {a.officialLink.label} <ArrowUpRight className="h-3.5 w-3.5" />
+                  {t(a.officialLink.label)} <ArrowUpRight className="h-3.5 w-3.5" />
                 </a>
               )}
-              <p className="mt-2 text-[13px]">{a.ask}</p>
+              {a.ask && <p className="mt-2 text-[13px]">{t(a.ask)}</p>}
               <span className="mt-1 block text-right text-[10px] text-muted">9:41</span>
             </div>
           </motion.div>
@@ -111,7 +113,7 @@ export default function ChatPreview() {
               const Icon = f === "transport" ? Bus : CalendarDays;
               return (
                 <Link key={f} to={guideUrl(prompt, lang)} className="inline-flex items-center gap-1.5 rounded-full border border-brand/40 bg-white px-3.5 py-2 text-sm font-medium text-brand shadow-sm transition hover:bg-brand hover:text-white">
-                  <Icon className="h-4 w-4" /> {label}
+                  <Icon className="h-4 w-4" /> {t(label)}
                 </Link>
               );
             })}
@@ -125,7 +127,7 @@ export default function ChatPreview() {
           <input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="Ask anything about your visit…"
+            placeholder={t("Ask anything about your visit…")}
             className="w-full rounded-full bg-stone-100 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand/30"
           />
         </label>
