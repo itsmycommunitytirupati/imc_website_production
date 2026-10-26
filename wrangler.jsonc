@@ -22,8 +22,8 @@
     // Only these emails may use the admin (Cloudflare Access sign-in).
     "ADMIN_EMAILS": "itsmycommunity.tirupati@gmail.com",
     // Fill both after creating the Access application (see CLAUDE.md); admin writes stay off until then.
-    "ACCESS_TEAM_DOMAIN": "",
-    "ACCESS_AUD": "",
+    "ACCESS_TEAM_DOMAIN": "bold-cherry-7506.cloudflareaccess.com",
+    "ACCESS_AUD": "5193a122c2ae170f3bea54075bdd1aede3c4374f63f24cc372b7f2abf93a2e3e",
     // Turnstile site key (public). The secret goes in a Worker secret: TURNSTILE_SECRET.
     "TURNSTILE_SITE_KEY": ""
   },
