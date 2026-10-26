@@ -126,16 +126,16 @@ Status key: **Keep** = meets the brief; **Improve** = exists, needs changes; **B
 
 ---
 
-## 5. Decisions and inputs needed from IMC
+## 5. Decisions and inputs from IMC (answered 26 October 2026)
 
-| # | Decision / input | Recommendation |
-|---|---|---|
-| D1 | **Homepage direction.** The brief specifies a community-first homepage ("Tirupati is home. Let's make it your community.", Explore Events / Find Your People). The current home is visitor-first from the earlier mock-up. | Adopt the brief's homepage and nav; keep the visitor guide and AI guide under **Discover** and as a "Visiting Tirupati?" band on the home page. |
-| D2 | **Real launch content:** upcoming events (title, date/time, venue, price, capacity, organizer) and 4–6 active groups with an owner each | Needed before any public launch (brief: "an active, useful community beats a large set of empty features"). |
-| D3 | **Verified numbers** for clubs, events, members | Hide until verified. |
-| D4 | **Photo and testimonial consent** for people shown on the site | Confirm, or we swap photos. |
-| D5 | **Backend go-ahead:** D1 + Cloudflare Access + Turnstile (all free tier) | Approve; admin emails for Access. |
-| D6 | **Who moderates** submissions/reports, and response time | Name an owner before Adda or submissions go live. |
+| # | Decision / input | Answer | What we do |
+|---|---|---|---|
+| D1 | Homepage direction | Not answered yet | Proceed with the recommendation: the brief's community-first homepage and nav, visitor guide + AI guide under **Discover** and a "Visiting Tirupati?" band. Easy to revisit. |
+| D2 | Real events and 4–6 groups with owners | **Keep the dummy content for now** | Dummy events and groups stay for representation, seeded into the database with a `sample` flag and shown with a visible **Sample** badge, so nothing looks like a live listing. Swap in real ones from the admin before public launch. |
+| D3 | Verified numbers (clubs, events, members) | IMC contact given: 9550815185 | Counts hidden until someone at IMC confirms each figure; then they're entered in the admin and shown. |
+| D4 | Photo and testimonial consent | **Done** | Keep photos; still add a "request a photo removal" link (the brief requires a removal pathway). |
+| D5 | Admin access | **itsmycommunity.tirupati@gmail.com** | Only this email gets into the admin (Cloudflare Access). |
+| D6 | Moderation | **The project owner, in the admin portal** | Review queue for submissions, ideas, stories and reports in the admin. |
 
 ---
 
@@ -158,13 +158,21 @@ Replacements for the copied headings (F1), drawn from the brief's sample microco
 
 ## 7. Delivery plan
 
-| Phase | Scope | Depends on |
-|---|---|---|
-| **0 (now)** | This audit; fixes F1–F5 on the preview | — |
-| **1: P0 (about 2 weeks)** | Homepage + nav per D1; events list with date/free filters; event detail pages; RSVP with confirmation/error/sold-out; group pages; join + first action; D1 + admin + Access + Turnstile; analytics events; share previews | D1, D2, D5 |
-| **2: participation (about 1 week)** | Tirupati Adda with moderation and idea status; organizer/opportunity submissions with review; stories with consent workflow | D6 |
-| **3: signature** | Tirupati Pulse, Memory Wall, Solo No More labels, Talent Exchange pilot; Local Legend only after tracking and moderation are reliable | Real activity data |
-| **Domain** | Move imctirupati.com from Vercel to the Worker, attach help./admin. subdomains | Phase 1 signed off |
+Each step ends with a refreshed preview link and the checklist (§3) updated. Nothing goes to
+`main` (the public site) until IMC signs off on Phase 1.
+
+| Step | What gets built | Checklist items | Needs from IMC |
+|---|---|---|---|
+| **0. Brief fixes** | F1 rewrite copied headings in IMC voice (all 4 languages); F2 hide counts; F3 **Sample** badges on dummy events/groups; F4 photo-removal link; F5 label the phone mock as an illustration | — | — |
+| **1. Homepage + navigation** | Nav: Discover · Events · Communities · Opportunities · Stories · Join IMC. Home: hero (*Tirupati is home…*, Explore Events / Find Your People), What's happening, Find your people, Stories, Opportunities, Join IMC, plus a "Visiting Tirupati?" band linking the visitor guide and AI guide | 01 | — |
+| **2. Backend foundation** | Cloudflare D1 database (events, groups, RSVPs, members, submissions, stories, reports) seeded with the sample content; Worker API; Turnstile spam protection on forms | — | — |
+| **3. Events** | `/events` with filters (today, this weekend, pick a date, category, free/paid, area); `/events/:slug` detail (venue, start/end, price, organizer, age/accessibility notes, cancellation terms, "Solo No More" first-timer notes); RSVP saved to the database with confirmation, share link, add-to-calendar, and error, sold-out and cancelled states; WhatsApp/Instagram share previews | 02, 03, 04, 10 | — |
+| **4. Communities + Join IMC** | `/communities/:slug` group pages (owner, interests, activity status, next event, related stories); preview before joining; lightweight join (name, one contact method, optional interests) with a recommended first action and a clear privacy note | 05, 06 | — |
+| **5. Admin portal** | `/admin` (later admin.imctirupati.com) behind Cloudflare Access for **itsmycommunity.tirupati@gmail.com**: create/edit events and groups, swap samples for real, view/export RSVPs, verified counts, review queue for submissions/ideas/stories, reports | 08, 12 | Turn on Cloudflare Zero Trust in the dashboard (free; I'll walk you through it) |
+| **6. Analytics** | GA4 events: `view_event_list`, `filter_events`, `view_event_detail`, `start_registration`, `registration_complete`, `join_group`, `select_interests`, `submit_idea`, `submit_opportunity`, `share_event`, `return_visit` | 11 | — |
+| **7. Participation (P1)** | Tirupati Adda (questions, polls, ideas with status: received → completed / not proceeding); organizer and opportunity submissions → review; Opportunities board (paid vs voluntary, eligibility, deadline); Stories/recaps with consent and removal | 07, 08, 09 | — |
+| **8. Sign-off + launch** | Run the full checklist with evidence; native-speaker review of Telugu/Tamil/Hindi; swap samples for real events; merge to `main`; move imctirupati.com from Vercel to the Worker; attach help./admin. subdomains | All | Real events/groups; DNS go-ahead |
+| **9. Signature (P2)** | Tirupati Pulse, Memory Wall search, Talent Exchange pilot, Local Legend (after tracking and moderation are reliable), IMC Wrapped from real data | — | Real activity data |
 
 Definition of done per release (from the brief): works on mobile and desktop end-to-end; no fake
 counts or placeholder events as live data; every control works or says "coming soon"; loading,
