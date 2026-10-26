@@ -111,6 +111,20 @@ src/
   config/Maintenance.ts  set IS_MAINTENANCE = true to show the maintenance page everywhere
 ```
 
+## Customer brief (governs priorities)
+
+`PLAN.md` holds the audit of the build against the customer's **Competitive Redesign Brief**
+(21 Oct 2026): Keep / Improve / Build inventory, the 12-point handoff checklist, decisions pending
+from IMC, and the phased plan (P0 events, RSVP, groups, join; P1 Adda, submissions, stories;
+P2 signature features). Update its checklist statuses as work lands. Non-negotiables from the brief:
+
+- **Do not copy competitor headlines, layout or brand styling** (communitie.in is a benchmark for
+  product patterns only). Write in IMC's own Telugu-English voice.
+- **No made-up counts, ratings or "biggest/best" claims; no placeholder events presented as live.**
+- **Consent** for identifiable photos, member spotlights and testimonials, with a removal pathway.
+- Every control works or is labelled "coming soon"; design loading, empty, error and success states.
+- Never claim an RSVP/registration succeeded until the backend confirms it.
+
 ## Content rules
 
 - **IMC is an independent community guide, not TTD.** Anything about darshan slots, prices,
@@ -142,8 +156,8 @@ src/
 - Type: **Plus Jakarta Sans** extra-bold for headings (`font-display`), **Inter** for body text.
 - Light theme only. Rounded-xl cards with a 1px `line` border and a soft shadow; brand-coloured
   icons (lucide-react, plus `GopuramIcon` for temple topics).
-- Community page (`site/CommunityPage.tsx`) follows communitie.in's richness with IMC's own
-  content: dotted hero with a turmeric marker highlight and floating polaroids, a "Coming up"
+- Community page (`site/CommunityPage.tsx`) borrows communitie.in's product patterns (not its
+  copy or styling; see the brief rules above) with IMC's own content: dotted hero with a turmeric marker highlight and floating polaroids, a "Coming up"
   ticker, a scrolling photo wall behind "Welcome to IMC.", photo cards for the eight club circles
   (hover or tap to join), fanned event posters, a WhatsApp phone mock-up, tilted "Your passion"
   polaroids with handwritten notes (`font-hand`, Caveat), Instagram-style posts, a testimonial
