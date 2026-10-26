@@ -35,7 +35,9 @@ async function verifyAccessJwt(token: string, env: Env): Promise<string | null> 
   const ok = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, b64urlToBytes(sig), new TextEncoder().encode(`${h}.${p}`));
   if (!ok) return null;
   const auds = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
-  if (!auds.includes(env.ACCESS_AUD)) return null;
+  // ACCESS_AUD may list several Access applications (admin domain, preview URLs), comma-separated.
+  const allowed = env.ACCESS_AUD.split(",").map((a) => a.trim()).filter(Boolean);
+  if (!auds.some((a) => a !== undefined && allowed.includes(a))) return null;
   if (!payload.exp || payload.exp * 1000 < Date.now()) return null;
   if (payload.iss !== `https://${host}`) return null;
   return payload.email?.toLowerCase() ?? null;

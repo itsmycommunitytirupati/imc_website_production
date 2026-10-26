@@ -255,7 +255,7 @@ P2 signature features). Update its checklist statuses as work lands. Non-negotia
 1. **Admin protection (blocks the admin):** Cloudflare Zero Trust → Access application covering
    `admin.imctirupati.com`, `imctirupati.com/admin*`, `imctirupati.com/api/admin/*` and the
    workers.dev equivalents, allowing `itsmycommunity.tirupati@gmail.com`. Then put the team domain
-   and the application's AUD tag in `wrangler.jsonc` vars (`ACCESS_TEAM_DOMAIN`, `ACCESS_AUD`).
+   and the AUD tag(s) in `wrangler.jsonc` vars (`ACCESS_TEAM_DOMAIN`, `ACCESS_AUD`; several AUDs comma-separated).
 2. **Turnstile (optional):** create a widget, put the site key in `TURNSTILE_SITE_KEY` and run
    `npx wrangler secret put TURNSTILE_SECRET` yourself.
 3. **Sign-off and launch (PLAN.md step 8):** real events and communities from the admin, native
