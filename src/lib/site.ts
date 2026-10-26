@@ -71,7 +71,7 @@ function readSaved(): string[] {
   }
 }
 
-// Saved experiences live in this browser only; there are no accounts yet.
+// Saved events live in this browser only; there are no accounts yet.
 export function useSaved(): [string[], (id: string) => void] {
   const [saved, setSaved] = useState<string[]>(readSaved);
   useEffect(() => {

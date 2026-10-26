@@ -2,30 +2,34 @@ import type { CSSProperties, ReactNode } from "react";
 import { ArrowDown, ArrowUpRight, Heart, Instagram, MessageCircle, Plus, Send } from "lucide-react";
 import { Link } from "../lib/router";
 import { CONTACT, usePageTitle } from "../lib/site";
-import { EXPERIENCES, formatDate, type Experience } from "../content/experiences";
-import { CLUB_GROUPS, FAQS, PASSION_CARDS, POSTER_STYLES } from "../content/community";
+import { FAQS, PASSION_CARDS, POSTER_STYLES } from "../content/community";
 import { IMC_PHOTOS, WALL } from "../content/photos";
 import { TESTIMONIALS } from "../data";
-import { joinLink } from "./ExperienceCard";
+import { formatWhen, imageUrl, priceLabel, useApi, type EventItem, type GroupItem } from "../lib/api";
+import { ErrorState, GroupCard, LoadingCards, SampleBadge } from "./kit";
 import { GopuramIcon, Logo } from "./ui";
 import Reveal from "./Reveal";
 import { useT } from "../lib/i18n";
 
-// Community hub for a younger crowd, in the spirit of communitie.in: big
-// playful type, real photos everywhere, and every path ending in a hello on WhatsApp.
+// The communities hub: IMC's official circles with real hosts and next meetups, upcoming events
+// as posters, and every path ending in an RSVP or a join. Copy is IMC's own (brief F1).
 
 const wa = (text: string) => `${CONTACT.whatsapp}?text=${encodeURIComponent(text)}`;
 
 const PASSION_LINKS = {
   partner: `mailto:${CONTACT.email}?subject=${encodeURIComponent("Partnering with IMC Tirupati")}`,
-  host: wa("Hi IMC! I'd like to host an experience."),
-  crew: wa("Hi IMC! I'd like to volunteer with the crew."),
+  host: "/opportunities#propose",
+  crew: "/opportunities",
 };
+
+function useUpcoming() {
+  return useApi<{ events: EventItem[] }>("/api/events?limit=8");
+}
 
 export default function CommunityPage() {
   usePageTitle(
-    "Community | IMC Tirupati, find your tribe",
-    "Clubs, meetups and experiences in Tirupati: sport, music, dance, treks, books, startups and more. Find your tribe with IMC.",
+    "Communities | IMC Tirupati",
+    "IMC's circles in Tirupati: music, sports, treks, food, creators, women, startups, social welfare and more. Meet the hosts, see what's next, join in a minute.",
   );
   return (
     <div className="bg-paper">
@@ -77,19 +81,19 @@ function Hero() {
           రండి! <span className="font-medium">{t("Randi, come along")}</span> 👋
         </p>
         <h1 className="mt-6 font-display text-[2.6rem] font-extrabold leading-[1.02] tracking-[-0.04em] sm:text-6xl lg:text-7xl">
-          {t("When did you last do something")} <Marker>{t("for the first time?")}</Marker>
+          {t("Introvert mode allowed.")} <Marker>{t("Your people are here.")}</Marker>
         </h1>
-        <p className="mx-auto mt-6 max-w-xl text-lg text-muted sm:text-xl">{t("Discover something new in Tirupati. Find people who get you.")}</p>
+        <p className="mx-auto mt-6 max-w-xl text-lg text-muted sm:text-xl">{t("Circles for music, sport, treks, food, making things and giving back, each with a host who says hi first.")}</p>
         <div className="mt-9 flex flex-wrap justify-center gap-3">
-          <Link to="/experiences" className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-brand">
-            {t("Explore experiences")} <ArrowUpRight className="h-4 w-4" />
+          <a href="#clubs" className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-brand">
+            {t("Browse communities")} <ArrowDown className="h-4 w-4" />
+          </a>
+          <Link to="/events" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold shadow-md ring-1 ring-ink/10 transition hover:-translate-y-0.5">
+            {t("Explore Events")} <ArrowUpRight className="h-4 w-4" />
           </Link>
-          <a href="#clubs" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold shadow-md ring-1 ring-ink/10 transition hover:-translate-y-0.5">
-            {t("Find a club")} <ArrowUpRight className="h-4 w-4" />
-          </a>
-          <a href="#get-involved" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold shadow-md ring-1 ring-ink/10 transition hover:-translate-y-0.5">
-            {t("Host with us")} <ArrowUpRight className="h-4 w-4" />
-          </a>
+          <Link to="/adda" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold shadow-md ring-1 ring-ink/10 transition hover:-translate-y-0.5">
+            {t("Tirupati Adda")} <ArrowUpRight className="h-4 w-4" />
+          </Link>
         </div>
         <a href="#welcome" className="mt-14 inline-flex flex-col items-center gap-1 text-xs font-medium text-muted">
           {t("Keep exploring")} <ArrowDown className="h-4 w-4 animate-bounce" />
@@ -101,7 +105,9 @@ function Hero() {
 
 function Ticker() {
   const t = useT();
-  const items = EXPERIENCES.slice(0, 8).map((e) => `${POSTER_STYLES[e.category].emoji} ${e.title} · ${e.recurring ?? formatDate(e.date)}`);
+  const { data } = useUpcoming();
+  const items = (data?.events ?? []).filter((e) => e.status === "scheduled").map((e) => `${POSTER_STYLES[e.category]?.emoji ?? "✨"} ${e.title} · ${formatWhen(e.start_at)}`);
+  if (!items.length) return <div className="h-11 bg-ink" />;
   const row = [...items, ...items];
   return (
     <div className="overflow-hidden bg-ink py-3 text-sm font-semibold text-white" aria-label={t("Coming up at IMC")}>
@@ -142,60 +148,65 @@ function PhotoWall() {
             IMC<span className="text-brand">.</span>
           </p>
           <p className="mt-3 text-lg font-medium sm:text-2xl">/ it's · my · community /</p>
-          <p className="mx-auto mt-4 max-w-md text-white/70">{t("Tirupati's people-first community. Real people, real meetups, every week.")}</p>
-          <div className="mt-6 flex flex-wrap justify-center gap-2">
-            {[t("50+ clubs"), t("700+ events a year"), t("40k+ members")].map((s) => (
-              <span key={s} className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold ring-1 ring-white/20 backdrop-blur">{s}</span>
-            ))}
-          </div>
+          <p className="mx-auto mt-4 max-w-md text-white/70">{t("Tirupati's people-first community. Real people, real meetups.")}</p>
+          <VerifiedStats />
         </Reveal>
       </div>
     </section>
   );
 }
 
-/* --------------------------------------------------------------- tribes */
+/* --------------------------------------------------------------- stats */
 
-function ClubCard({ g }: { g: (typeof CLUB_GROUPS)[number] }) {
+// Counts appear only after the IMC team verifies them in the admin (brief: no unverified numbers).
+function VerifiedStats() {
   const t = useT();
+  const { data } = useApi<{ stats: { items: { label: string; value: string }[]; verified_on?: string } | null }>("/api/stats");
+  const items = data?.stats?.items?.filter((i) => i.label && i.value) ?? [];
+  if (!items.length) return null;
   return (
-    <div className="group relative aspect-[4/3] overflow-hidden rounded-[28px] shadow-[0_18px_40px_-18px_rgba(0,0,0,0.45)] ring-4 ring-white">
-      <img src={g.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 p-5">
-        <h3 className="font-display text-2xl font-extrabold text-white drop-shadow sm:text-3xl">{t(g.title)}</h3>
-        <div className="mt-3 flex flex-wrap gap-1.5 transition-all duration-300 lg:max-h-0 lg:opacity-0 lg:group-focus-within:max-h-40 lg:group-focus-within:opacity-100 lg:group-hover:max-h-40 lg:group-hover:opacity-100">
-          {g.clubs.map((c) => (
-            <a key={c} href={wa(`Hi IMC! I'd like to join the ${c} club.`)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-turmeric">
-              <Plus className="h-3 w-3" /> {t(c)}
-            </a>
-          ))}
-        </div>
+    <div className="mt-6">
+      <div className="flex flex-wrap justify-center gap-2">
+        {items.map((s) => (
+          <span key={s.label} className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold ring-1 ring-white/20 backdrop-blur">{s.value} {t(s.label)}</span>
+        ))}
       </div>
+      {data?.stats?.verified_on && <p className="mt-2 text-xs text-white/50">{t("Verified by IMC on")} {data.stats.verified_on}</p>}
     </div>
   );
 }
 
+/* --------------------------------------------------------------- tribes */
+
 function Tribes() {
   const t = useT();
-  const before = CLUB_GROUPS.slice(0, 4);
-  const after = CLUB_GROUPS.slice(4);
+  const { data, loading, error, reload } = useApi<{ groups: GroupItem[] }>("/api/groups");
+  const groups = data?.groups ?? [];
   return (
     <section id="clubs" className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
       <Reveal className="text-center">
-        <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">{t("Find your tribe.")}</h2>
-        <p className="mx-auto mt-4 max-w-xl text-lg text-muted">{t("Eight circles, 50+ clubs. Hover a circle (or tap on your phone) and say hi to the one that feels like you.")}</p>
+        <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">{t("Pick a circle. We'll say hi first.")}</h2>
+        <p className="mx-auto mt-4 max-w-xl text-lg text-muted">{t("Every IMC community has a host, a next meetup and room for first-timers. Open one to see who runs it and what's coming up.")}</p>
       </Reveal>
-      <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {before.map((g) => <ClubCard key={g.title} g={g} />)}
-        <div className="flex aspect-[4/3] flex-col items-center justify-center gap-4 rounded-[28px] bg-white p-6 text-center shadow-[0_18px_40px_-18px_rgba(0,0,0,0.25)] ring-4 ring-white">
-          <div className="scale-150"><Logo /></div>
-          <a href={wa("Hi IMC! Which clubs can I join?")} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 font-semibold text-white transition hover:bg-brand">
-            {t("All clubs")} <ArrowUpRight className="h-4 w-4" />
-          </a>
-          <p className="font-hand text-2xl text-muted">{t("Let's go, randi! 🎢")}</p>
-        </div>
-        {after.map((g) => <ClubCard key={g.title} g={g} />)}
+      <div className="mt-12">
+        {loading ? (
+          <LoadingCards count={6} />
+        ) : error ? (
+          <ErrorState error={error} onRetry={reload} />
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {groups.slice(0, 4).map((g) => <GroupCard key={g.slug} g={g} />)}
+            <div className="flex flex-col items-center justify-center gap-4 rounded-3xl bg-white p-6 text-center shadow-sm ring-1 ring-line">
+              <div className="scale-125"><Logo /></div>
+              <p className="mt-2 max-w-xs text-muted">{t("Can't decide? Join IMC and we'll suggest a circle and an easy first meetup.")}</p>
+              <Link to="/join" className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 font-semibold text-white transition hover:bg-brand">
+                {t("Join IMC")} <ArrowUpRight className="h-4 w-4" />
+              </Link>
+              <p className="font-hand text-2xl text-muted">{t("Let's go, randi! 🎢")}</p>
+            </div>
+            {groups.slice(4).map((g) => <GroupCard key={g.slug} g={g} />)}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -203,61 +214,52 @@ function Tribes() {
 
 /* ---------------------------------------------------------- experiences */
 
-function Poster({ e, className = "", style }: { e: Experience; className?: string; style?: CSSProperties }) {
+function Poster({ e, className = "", style }: { e: EventItem; className?: string; style?: CSSProperties }) {
   const t = useT();
-  const p = POSTER_STYLES[e.category];
-  const [weekday, day, month] = new Date(e.date + "T00:00:00")
-    .toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })
-    .replace(",", "")
-    .split(" ");
+  const p = POSTER_STYLES[e.category] ?? POSTER_STYLES.meetups;
   return (
-    <a
-      href={joinLink(e)}
-      target="_blank"
-      rel="noopener noreferrer"
-      style={style}
-      className={`group/poster relative block overflow-hidden rounded-2xl text-left shadow-2xl ring-1 ring-black/10 ${className}`}
-    >
-      <img src={e.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+    <Link to={`/events/${e.slug}`} style={style} className={`group/poster relative block overflow-hidden rounded-2xl text-left shadow-2xl ring-1 ring-black/10 ${className}`}>
+      <img src={imageUrl(e.image)} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
       <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${p.bg} 42%, ${p.bg}cc 58%, transparent 85%)` }} />
       <div className="relative flex h-full flex-col p-4" style={{ color: p.fg }}>
         <div className="flex items-start justify-between">
           <span className="rounded-md bg-white px-2 py-1 text-center text-[10px] font-bold uppercase leading-tight text-ink shadow">
-            {weekday}
-            <span className="block font-display text-xl leading-none">{day}</span>
-            {month}
+            {formatWhen(e.start_at, { weekday: "short" })}
+            <span className="block font-display text-xl leading-none">{formatWhen(e.start_at, { day: "numeric" })}</span>
+            {formatWhen(e.start_at, { month: "short" })}
           </span>
-          <span className="rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-bold tracking-wider text-white">IMC</span>
+          {e.is_sample === 1 ? <SampleBadge /> : <span className="rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-bold tracking-wider text-white">IMC</span>}
         </div>
         <div className="mt-auto">
           <p className="text-3xl">{p.emoji}</p>
           <p className="mt-1 font-display text-2xl font-extrabold uppercase leading-[0.95] tracking-tight">{e.title}</p>
           <p className="mt-2 text-xs opacity-80">{e.venue}</p>
           <div className="mt-3 flex items-center justify-between">
-            <span className="rounded-full px-2.5 py-1 text-xs font-bold" style={{ background: p.accent, color: p.bg }}>{t(e.price)}</span>
-            <span className="text-xs font-semibold underline-offset-4 group-hover/poster:underline">{t("I'm in")} →</span>
+            <span className="rounded-full px-2.5 py-1 text-xs font-bold" style={{ background: p.accent, color: p.bg }}>{t(priceLabel(e))}</span>
+            <span className="text-xs font-semibold underline-offset-4 group-hover/poster:underline">{e.seats_left === 0 ? t("Sold out") : `${t("I'm in")} →`}</span>
           </div>
         </div>
       </div>
-    </a>
+    </Link>
   );
 }
 
 function ExperiencesFan() {
   const t = useT();
-  const fan = EXPERIENCES.slice(0, 7);
+  const { data } = useUpcoming();
+  const fan = (data?.events ?? []).filter((e) => e.status === "scheduled").slice(0, 7);
   const mid = (fan.length - 1) / 2;
   return (
     <section className="px-3 py-6 sm:px-6">
       <div className="mx-auto max-w-7xl overflow-hidden rounded-[40px] bg-white px-4 py-16 text-center sm:px-10">
         <Reveal>
-          <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">{t("Experiences, together.")}</h2>
+          <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">{t("Weekend vachindhi. Excuses enduku?")}</h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted">
-            {t("From sunrise runs at Alipiri to starlit camps on Horsley Hills, there's always something on. Here's what's coming up.")}
+            {t("Sunrise runs at Alipiri, music on a terrace, a trail to Talakona falls. Pick one and save your spot.")}
           </p>
           <div className="relative mt-8 inline-flex items-center">
-            <Link to="/experiences" className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 font-semibold text-white shadow-lg transition hover:bg-brand">
-              {t("Explore experiences")} <ArrowUpRight className="h-4 w-4" />
+            <Link to="/events" className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 font-semibold text-white shadow-lg transition hover:bg-brand">
+              {t("Explore Events")} <ArrowUpRight className="h-4 w-4" />
             </Link>
             <span className="absolute left-full ml-5 hidden w-56 -rotate-3 text-left font-hand text-2xl leading-tight text-muted lg:block">
               ← {t("psst… most people come alone the first time 👀")}
@@ -270,7 +272,7 @@ function ExperiencesFan() {
             const offset = i - mid;
             return (
               <div
-                key={e.id}
+                key={e.slug}
                 className="group/fan absolute left-1/2 top-0 hover:!z-50"
                 style={{
                   translate: `calc(-50% + ${offset * 118}px) ${Math.abs(offset) * 16}px`,
@@ -288,7 +290,7 @@ function ExperiencesFan() {
           })}
         </div>
         <div className="scrollbar-none -mx-4 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 lg:hidden">
-          {fan.map((e) => <Poster key={e.id} e={e} className="h-[360px] w-[72%] shrink-0 snap-center sm:w-[260px]" />)}
+          {fan.map((e) => <Poster key={e.slug} e={e} className="h-[360px] w-[72%] shrink-0 snap-center sm:w-[260px]" />)}
         </div>
       </div>
     </section>
@@ -307,7 +309,6 @@ function ChatLine({ me, children }: { me?: boolean; children: ReactNode }) {
 
 function WhatsAppPocket() {
   const t = useT();
-  const hero = EXPERIENCES[0];
   return (
     <section className="px-3 py-6 sm:px-6">
       <div className="mx-auto grid max-w-7xl items-center gap-12 overflow-hidden rounded-[40px] bg-ink px-6 py-14 text-white sm:px-12 lg:grid-cols-2">
@@ -317,12 +318,12 @@ function WhatsAppPocket() {
             {t("Your next first time is one message away.")}
           </h2>
           <p className="mt-5 max-w-lg text-lg text-white/70">
-            {t("Say hi on WhatsApp and we'll add you to the clubs you like. Every plan, poll and photo lands right there, so all you do is show up.")}
+            {t("Join IMC and a host adds you to the circles you like. Plans, polls and photos land in one WhatsApp group, so all you do is show up.")}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <a href={wa("Hi IMC! I'd like to join the community 👋")} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold text-ink transition hover:bg-turmeric">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" /> {t("Say hi on WhatsApp")} <ArrowUpRight className="h-4 w-4" />
-            </a>
+            <Link to="/join" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold text-ink transition hover:bg-turmeric">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" /> {t("Join IMC")} <ArrowUpRight className="h-4 w-4" />
+            </Link>
             <a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 font-semibold ring-1 ring-white/30 transition hover:bg-white/10">
               <Instagram className="h-4 w-4" /> @imc.tirupati
             </a>
@@ -331,6 +332,7 @@ function WhatsAppPocket() {
         </Reveal>
 
         <Reveal delay={0.15} className="mx-auto">
+          <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wider text-white/50">{t("Illustration: how an IMC WhatsApp group looks")}</p>
           <div className="relative w-[290px] rounded-[46px] border-[10px] border-neutral-800 bg-[#efe6da] shadow-2xl" aria-hidden="true">
             <span className="absolute left-1/2 top-2 z-10 h-5 w-24 -translate-x-1/2 rounded-full bg-neutral-800" />
             <div className="flex items-center gap-2 rounded-t-[36px] bg-brand px-4 pb-3 pt-9 text-white">
@@ -342,8 +344,8 @@ function WhatsAppPocket() {
             </div>
             <div className="dot-grid space-y-2 px-3 py-4 text-ink">
               <ChatLine>
-                <img src={hero.image} alt="" className="mb-2 aspect-[16/10] w-full rounded-lg object-cover" />
-                🎸 <b>{hero.title}</b> this {formatDate(hero.date)}, {hero.time}. Who's in?
+                <img src={IMC_PHOTOS.danceCrowd} alt="" className="mb-2 aspect-[16/10] w-full rounded-lg object-cover" />
+                🎸 <b>Terrace jam</b> this Saturday, 6:30 PM. Who's in?
               </ChatLine>
               <ChatLine>
                 <p className="font-semibold">📊 Sunday run: pick your pace</p>
@@ -376,9 +378,9 @@ function Passion() {
   return (
     <section id="get-involved" className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
       <Reveal className="text-center">
-        <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">{t("Your passion, our platform.")}</h2>
+        <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">{t("Don't just attend the scene. Create the scene.")}</h2>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted">
-          {t("Got an idea for a club, a space that could host the next meetup, or a skill the city should see? Let's build it together.")}
+          {t("Talent undhi. Team ledhu. Let's fix that. Propose a meetup, offer a venue, or lend a skill.")}
         </p>
       </Reveal>
       <div className="mt-14 grid items-start gap-12 md:grid-cols-3 md:gap-8">
@@ -390,9 +392,9 @@ function Passion() {
               <div className="p-3">
                 <h3 className="font-display text-2xl font-extrabold">{t(c.title)}</h3>
                 <p className="mt-2 text-muted">{t(c.text)}</p>
-                <a href={PASSION_LINKS[c.action]} target="_blank" rel="noopener noreferrer" className="mt-5 flex items-center justify-center gap-2 rounded-full bg-ink py-3 font-semibold text-white transition hover:bg-brand">
+                <Link to={PASSION_LINKS[c.action]} className="mt-5 flex items-center justify-center gap-2 rounded-full bg-ink py-3 font-semibold text-white transition hover:bg-brand">
                   {t(c.cta)} <ArrowUpRight className="h-4 w-4" />
-                </a>
+                </Link>
               </div>
             </div>
           </Reveal>
@@ -432,17 +434,25 @@ function Social() {
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-tr from-amber-400 via-brand to-fuchsia-600 text-white"><Instagram className="h-5 w-5" /></span>
             imc.tirupati
           </a>
-          <h2 className="mt-6 font-display text-4xl font-extrabold leading-[1.02] tracking-[-0.03em] sm:text-6xl">{t("Your social circle, a tap away.")}</h2>
-          <p className="mt-5 max-w-md text-lg text-muted">{t("Club moments, behind-the-scenes chaos and the photos everyone asks for. Follow along and be part of the story.")}</p>
-          <a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 font-semibold text-white transition hover:bg-brand">
-            {t("Follow us")} <ArrowUpRight className="h-4 w-4" />
-          </a>
+          <h2 className="mt-6 font-display text-4xl font-extrabold leading-[1.02] tracking-[-0.03em] sm:text-6xl">{t("Proof that we actually touched grass this weekend.")}</h2>
+          <p className="mt-5 max-w-md text-lg text-muted">{t("Recaps, photos and the chaos behind them. Photos are shared with consent.")}</p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link to="/stories" className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 font-semibold text-white transition hover:bg-brand">
+              {t("Memory wall")} <ArrowUpRight className="h-4 w-4" />
+            </Link>
+            <a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold ring-1 ring-line transition hover:ring-brand/40">
+              {t("Follow us")} <ArrowUpRight className="h-4 w-4" />
+            </a>
+          </div>
         </Reveal>
         <div className="relative h-[400px]">
           <Post src={IMC_PHOTOS.outdoorSelfie} likes="moments" className="left-[2%] top-10 -rotate-6" />
           <Post src={IMC_PHOTOS.waterfall} likes="memories" className="left-[30%] top-0 z-10 rotate-3" />
           <Post src={IMC_PHOTOS.festiveMeetup} likes="friends" className="right-[0%] top-16 hidden rotate-[8deg] sm:block" />
-          <p className="absolute bottom-0 left-4 z-20 -rotate-2 font-hand text-2xl">{t("Is that you in the picture? 👀")}</p>
+          <p className="absolute bottom-0 left-4 z-20 max-w-xs -rotate-2 font-hand text-2xl leading-tight">
+            {t("Spotted yourself? Tag a friend, or ask us to take it down.")}{" "}
+            <Link to="/report?type=photo_removal" className="underline">{t("Request removal")}</Link>
+          </p>
         </div>
       </div>
     </section>
@@ -519,10 +529,10 @@ function SeeYou() {
       <GopuramIcon className="pointer-events-none absolute -right-8 -top-8 h-56 w-56 text-white/10" />
       <Reveal className="relative">
         <h2 className="font-display text-5xl font-extrabold tracking-[-0.04em] sm:text-7xl">{t("See you this Sunday? 👋")}</h2>
-        <p className="mx-auto mt-4 max-w-lg text-lg text-white/85">{t("Pick a club, pick an experience, or just say hi. Your first time is on us to make easy.")}</p>
+        <p className="mx-auto mt-4 max-w-lg text-lg text-white/85">{t("Pick a circle, pick an event, or just say hi. We'll make your first time easy.")}</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link to="/experiences" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold text-ink transition hover:bg-turmeric">
-            {t("Explore experiences")} <ArrowUpRight className="h-4 w-4" />
+          <Link to="/events" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold text-ink transition hover:bg-turmeric">
+            {t("Explore Events")} <ArrowUpRight className="h-4 w-4" />
           </Link>
           <a href={wa("Hi IMC! 👋")} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 font-semibold ring-1 ring-white/50 transition hover:bg-white/10">
             {t("Say hi on WhatsApp")} <ArrowUpRight className="h-4 w-4" />

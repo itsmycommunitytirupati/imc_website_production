@@ -133,7 +133,7 @@ export default function VisitorGuidePage() {
         {TOPICS.map((topic) => {
           const { image, Icon } = TOPIC_LOOK[topic.id];
           return (
-            <section key={topic.id} id={topic.id} className="grid gap-8 lg:grid-cols-[400px_1fr]">
+            <section key={topic.id} id={topic.id} className="grid grid-cols-1 gap-8 lg:grid-cols-[400px_1fr]">
               <Reveal className="lg:sticky lg:top-40 lg:self-start">
                 <div className="relative overflow-hidden rounded-[28px] shadow-xl">
                   <img src={image} alt="" loading="lazy" className="aspect-[4/3] w-full object-cover lg:aspect-[4/5]" />
@@ -166,7 +166,7 @@ export default function VisitorGuidePage() {
                     </Link>
                   ))}
                   {topic.id === "things-to-do" && (
-                    <Link to="/experiences" className="inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-brand">
+                    <Link to="/events" className="inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-brand">
                       {t("See what's on this week")} <ArrowRight className="h-4 w-4" />
                     </Link>
                   )}

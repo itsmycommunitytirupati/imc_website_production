@@ -21,6 +21,12 @@ Preview audited: https://redesign-imc-website-production.itsmycommunity-tirupati
 
 These are small, and should land before the customer reviews the next preview.
 
+**Status (26 October 2026): all five fixed.** F1 headings rewritten in IMC's voice (all four
+languages); F2 counts removed and replaced by admin-verified numbers only; F3 every sample event,
+community, story, opportunity and Adda post carries a **Sample** badge (and event pages a banner);
+F4 consent confirmed by IMC, removal pathway in footer, stories and `/report`; F5 phone mock
+labelled "Illustration".
+
 ---
 
 ## 2. Feature inventory: Keep / Improve / Build
@@ -84,20 +90,22 @@ Status key: **Keep** = meets the brief; **Improve** = exists, needs changes; **B
 
 ## 3. Handoff checklist (brief §9): status today
 
+Updated 26 October 2026 after steps 0 to 7 landed on `redesign/visitor-first-home` (preview only).
+
 | No. | Acceptance criterion | Status | Evidence / gap |
 |---|---|---|---|
-| 01 | Homepage explains IMC and offers clear next actions | Partial | Visitor-first home is clear; brief's community-first hero/CTAs pending D1. |
-| 02 | Visitor can discover upcoming events and filter | Partial | `/experiences` category filter; missing date and free/paid filters; events are samples. |
-| 03 | Event detail page: date/time, venue, price, organizer, registration | Not started | |
-| 04 | RSVP flow with tested confirmation and error states | Not started | |
-| 05 | Interest groups connect to events and activities | Partial | Circles → WhatsApp; no group pages. |
-| 06 | New member takes one meaningful first action without friction | Partial | Browse-first works; no join/onboarding. |
-| 07 | Organizer can submit an event/opportunity for review | Not started | |
-| 08 | Community submissions: moderation, status, reporting rules | Not started | |
-| 09 | Member stories/photos: consent and removal pathway | Not started | See F4. |
-| 10 | Mobile, performance, accessibility, share previews checked | Partial | Mobile/perf/a11y checked; per-event share previews need server-side meta tags. |
-| 11 | Analytics for discovery, registration, joins, submissions, return visits | Not started | GA4 tag present (page views only). |
-| 12 | Admin can update events, stories, groups without a developer | Not started | Admin is a sample-data shell. |
+| 01 | Homepage explains IMC and offers clear next actions | Done | Community-first home: hero (Explore Events / Find Your People), What's happening, Find your people, Adda, Stories, Opportunities, Join IMC, "Visiting Tirupati?" band. Visitor home moved to `/discover`. |
+| 02 | Visitor can discover upcoming events and filter | Done | `/events`: any day / today / this weekend / pick a date, category, free/paid, area, first-timer friendly; filters live in the URL. Events are **Sample** until IMC adds real ones. |
+| 03 | Event detail page: date/time, venue, price, organizer, registration | Done | `/events/:slug` with maps link, price note, host, age/accessibility/cancellation notes, Solo No More note, related events. |
+| 04 | RSVP flow with tested confirmation and error states | Done | Saved in D1 with a reference; field errors, sold-out → waitlist, cancelled, ended, offline, rate-limit and repeat-booking states; confirmation only after the server confirms; add-to-calendar and share. Tested locally. |
+| 05 | Interest groups connect to events and activities | Done | `/communities` and `/communities/:slug` with official logos, host, status, interests, next events, past stories. |
+| 06 | New member takes one meaningful first action without friction | Done | `/join` (name, one contact, optional interests and community) → "You're in. Introvert mode can remain on." with one suggested first event. Join form also on every community page. |
+| 07 | Organizer can submit an event/opportunity for review | Done | `/opportunities` post form and propose-an-event form → admin review queue. |
+| 08 | Community submissions: moderation, status, reporting rules | Done | Adda posts are unpublished until approved; idea statuses; poll close; report links on posts and events; `/report`; Adda rules. |
+| 09 | Member stories/photos: consent and removal pathway | Done | Stories need `consent_confirmed` to publish (enforced by the API); removal links in footer, stories and story pages; `/report?type=photo_removal`. |
+| 10 | Mobile, performance, accessibility, share previews checked | Done (re-check on preview) | Checked at 375/800/1280 with no sideways scroll; per-event/community/story share previews from the Worker; translations load only when chosen (main bundle 390 kB, 122 kB gzipped). |
+| 11 | Analytics for discovery, registration, joins, submissions, return visits | Done (verify in GA4 after launch) | All 11 brief events fire through the existing GA4 tag; no personal data in parameters. |
+| 12 | Admin can update events, stories, groups without a developer | Done, pending Access | `/admin`: overview, events, RSVPs (CSV), communities, join requests, Adda moderation, opportunities, stories, proposals & reports, verified numbers. Locked until Cloudflare Access is configured. |
 
 ---
 
@@ -160,6 +168,10 @@ Replacements for the copied headings (F1), drawn from the brief's sample microco
 
 Each step ends with a refreshed preview link and the checklist (§3) updated. Nothing goes to
 `main` (the public site) until IMC signs off on Phase 1.
+
+**Progress (26 October 2026):** steps 0 to 7 are built on `redesign/visitor-first-home` and on the
+preview. Open items: Cloudflare Access for the admin (step 5), optional Turnstile keys, then
+step 8 (sign-off, real content, native-speaker review, domain move).
 
 | Step | What gets built | Checklist items | Needs from IMC |
 |---|---|---|---|

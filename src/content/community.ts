@@ -1,18 +1,5 @@
 import { IMC_PHOTOS } from "./photos";
 
-// Real IMC clubs, grouped the way people browse them, each with a real IMC photo.
-export const CLUB_GROUPS = [
-  { title: "Sports & fitness", image: IMC_PHOTOS.badminton, clubs: ["Cricket", "Badminton", "Volleyball", "Pickleball", "Cycling", "Cue Club"] },
-  { title: "Dance & music", image: IMC_PHOTOS.classicalDance, clubs: ["Dance", "Music", "Mic.tirupati open mic"] },
-  { title: "Arts & making", image: IMC_PHOTOS.artTable, clubs: ["Art & Craft", "Creator Club", "Culture & Lifestyle"] },
-  { title: "Books & games", image: IMC_PHOTOS.bookTable, clubs: ["Book Club", "Board Games"] },
-  // index 4 is the centre tile on desktop
-  { title: "Outdoors & treks", image: IMC_PHOTOS.hilltop, clubs: ["Nature Retreat", "Treks & trails"] },
-  { title: "Women's circle", image: IMC_PHOTOS.womensCircle, clubs: ["Women's Circle", "Kids & Parents"] },
-  { title: "Careers & startups", image: IMC_PHOTOS.roundTable, clubs: ["Startup Club", "Connect Tirupati"] },
-  { title: "Giving back", image: IMC_PHOTOS.floorCircle, clubs: ["Social Welfare", "Green Tirupati drives"] },
-];
-
 export const PASSION_CARDS = [
   {
     note: "Partner with us 🤝",
@@ -41,13 +28,14 @@ export const PASSION_CARDS = [
 ];
 
 export const FAQS = [
-  { q: "What is IMC?", a: "IMC (It's My Community) is a people-first community in Tirupati. We run clubs and experiences across sport, music, dance, treks, books, careers and more, so anyone can find their people." },
-  { q: "How do I join a club?", a: "Tap any club and say hi on WhatsApp. We'll add you to that club's group, where meetups are announced." },
+  { q: "What is IMC?", a: "IMC (It's My Community) is a people-first community in Tirupati. We run communities and events across music, sport, treks, food, creators, careers, social welfare and more, so anyone can find their people." },
+  { q: "How do I join a community?", a: "Open any community and use the join form, or join IMC and pick your interests. A host adds you to that community's WhatsApp group, where meetups are announced." },
   { q: "Can I join more than one club?", a: "Of course. Most members are part of two or three." },
-  { q: "I'm only visiting Tirupati. Can I join an experience?", a: "Yes. Food walks, runs, music evenings and treks are open to visitors. Tap \"I'm in\" on any experience." },
+  { q: "I'm only visiting Tirupati. Can I come to an event?", a: "Yes. Food walks, runs, music evenings and treks are open to visitors. Open any event and RSVP." },
   { q: "I don't know anyone. Is that okay?", a: "That's how almost everyone starts. Our hosts make sure first-timers are introduced around." },
-  { q: "Are there fees?", a: "Many meetups are free. Some experiences charge a small fee for venue, materials or transport, and the price is always shown upfront." },
-  { q: "How can I suggest a new club?", a: "Message us with the idea. If there's interest, we'll help you start it." },
+  { q: "Are there fees?", a: "Many meetups are free. Some events charge a small fee for venue, materials or transport, and the price is always shown upfront." },
+  { q: "How can I suggest a new meetup or community?", a: "Use the propose-an-event form on the Opportunities page. The team reviews every idea and replies." },
+  { q: "A photo of me is on the site. Can it come down?", a: "Yes. Use the photo removal form linked in the footer and we'll take it down." },
 ];
 
 // Poster colours for experience cards, by category.

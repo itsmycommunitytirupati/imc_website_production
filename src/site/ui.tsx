@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode, type SVGProps } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { ArrowUpRight, Bookmark, Check, ChevronDown, Compass, Globe, Home, Instagram, Mail, Menu, MessageCircle, X } from "lucide-react";
+import { ArrowUpRight, Bookmark, CalendarDays, Check, ChevronDown, Compass, Globe, Home, Instagram, Mail, Menu, MessageCircle, Users, X } from "lucide-react";
 import { Link, useLocation } from "../lib/router";
 import { CONTACT, LANGS, guideUrl, useLang } from "../lib/site";
 import { useT } from "../lib/i18n";
@@ -107,11 +107,15 @@ export function LanguageMenu({ className = "", dark = false }: { className?: str
   );
 }
 
+// The brief's navigation. Discover holds the visitor guide and the AI guide.
 const NAV = [
-  { to: "/visitor-guide", label: "Visitor guide" },
-  { to: "/experiences", label: "Experiences" },
-  { to: "/community", label: "Community" },
+  { to: "/discover", label: "Discover", match: ["/discover", "/visitor-guide"] },
+  { to: "/events", label: "Events", match: ["/events"] },
+  { to: "/communities", label: "Communities", match: ["/communities", "/adda"] },
+  { to: "/opportunities", label: "Opportunities", match: ["/opportunities"] },
+  { to: "/stories", label: "Stories", match: ["/stories"] },
 ];
+const isActive = (path: string, prefixes: string[]) => prefixes.some((p) => path === p || path.startsWith(`${p}/`));
 
 function useScrolled(threshold = 8) {
   const [scrolled, setScrolled] = useState(false);
@@ -142,32 +146,32 @@ export function Header() {
     <>
     <header className={`sticky top-0 z-40 border-b transition-all duration-300 ${scrolled || open ? "border-line bg-white/90 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] backdrop-blur-xl" : "border-transparent bg-white/70 backdrop-blur"}`}>
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 sm:px-6 md:h-20">
-        <button className="-ml-1 rounded-full p-1.5 md:hidden" onClick={() => setOpen((o) => !o)} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open}>
+        <button className="-ml-1 rounded-full p-1.5 lg:hidden" onClick={() => setOpen((o) => !o)} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open}>
           {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
         <Link to="/" className="shrink-0">
           <Logo />
         </Link>
-        <nav className="mx-auto hidden items-center gap-1 whitespace-nowrap md:flex" aria-label="Main">
+        <nav className="mx-auto hidden items-center gap-0.5 whitespace-nowrap lg:flex" aria-label="Main">
           {NAV.map((n) => {
-            const active = path === n.to;
+            const active = isActive(path, n.match);
             return (
               <Link
                 key={n.to}
                 to={n.to}
-                className={`relative rounded-full px-4 py-2 text-[15px] font-medium transition-colors hover:text-brand ${active ? "text-brand" : "text-ink"}`}
+                className={`relative rounded-full px-3 py-2 text-[15px] font-medium xl:px-4 transition-colors hover:text-brand ${active ? "text-brand" : "text-ink"}`}
                 aria-current={active ? "page" : undefined}
               >
                 {t(n.label)}
-                {active && <motion.span layoutId="nav-underline" className="absolute inset-x-4 -bottom-0.5 h-0.5 rounded-full bg-brand" />}
+                {active && <motion.span layoutId="nav-underline" className="absolute inset-x-3 -bottom-0.5 xl:inset-x-4 h-0.5 rounded-full bg-brand" />}
               </Link>
             );
           })}
         </nav>
-        <div className="ml-auto flex items-center gap-2 md:ml-0">
+        <div className="ml-auto flex items-center gap-2 lg:ml-0">
           <LanguageMenu />
-          <Link to={CONTACT.whatsapp} className="hidden items-center gap-2 whitespace-nowrap rounded-full bg-ink px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand lg:inline-flex">
-            <MessageCircle className="h-4 w-4" /> {t("Contact IMC")}
+          <Link to="/join" className={`hidden items-center gap-2 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold text-white transition sm:inline-flex ${path === "/join" ? "bg-brand" : "bg-ink hover:bg-brand"}`}>
+            {t("Join IMC")}
           </Link>
         </div>
       </div>
@@ -181,18 +185,18 @@ export function Header() {
 function MobileMenu({ path }: { path: string }) {
   const t = useT();
   const [lang] = useLang();
-  const items = [{ to: "/", label: "Home" }, ...NAV, { to: "/saved", label: "Saved" }];
+  const items = [{ to: "/", label: "Home" }, ...NAV, { to: "/adda", label: "Tirupati Adda" }, { to: "/join", label: "Join IMC" }, { to: "/saved", label: "Saved" }];
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-x-0 bottom-0 top-16 z-40 overflow-y-auto bg-cream md:hidden"
+      className="fixed inset-x-0 bottom-0 top-16 z-40 overflow-y-auto bg-cream md:top-20 lg:hidden"
     >
       <nav className="px-5 pt-6" aria-label="Main">
         {items.map((n, i) => (
           <motion.div key={n.to} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.04 * i }}>
             <Link to={n.to} className={`flex items-baseline gap-4 border-b border-line py-4 font-display text-3xl font-extrabold tracking-tight ${path === n.to ? "text-brand" : ""}`}>
-              <span className="w-6 text-xs font-semibold text-muted">0{i + 1}</span>
+              <span className="w-6 text-xs font-semibold text-muted">{String(i + 1).padStart(2, "0")}</span>
               {t(n.label)}
             </Link>
           </motion.div>
@@ -241,20 +245,23 @@ export function Footer() {
         <div className="grid gap-10 py-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <Logo compact light />
-            <p className="mt-4 max-w-xs text-sm text-white/60">{t("A local welcome to Tirupati, from the people who live here.")}</p>
+            <p className="mt-4 max-w-xs text-sm text-white/60">{t("Tirupati's people-first community: events, circles and a local welcome.")}</p>
             <LanguageMenu dark className="-ml-3 mt-4" />
           </div>
+          <FooterCol title={t("Community")}>
+            <Link to="/events">{t("Events")}</Link>
+            <Link to="/communities">{t("Communities")}</Link>
+            <Link to="/adda">{t("Tirupati Adda")}</Link>
+            <Link to="/opportunities">{t("Opportunities")}</Link>
+            <Link to="/stories">{t("Stories")}</Link>
+            <Link to="/join">{t("Join IMC")}</Link>
+          </FooterCol>
           <FooterCol title={t("Visit")}>
+            <Link to="/discover">{t("Discover Tirupati")}</Link>
             <Link to="/visitor-guide#tirumala">{t("Tirumala visit")}</Link>
             <Link to="/visitor-guide#getting-around">{t("Getting around")}</Link>
             <Link to="/visitor-guide#food-stays">{t("Food & stays")}</Link>
             <Link to="/guide">{t("Ask the guide")}</Link>
-          </FooterCol>
-          <FooterCol title={t("Community")}>
-            <Link to="/experiences">{t("Experiences")}</Link>
-            <Link to="/community#clubs">{t("Clubs")}</Link>
-            <Link to="/community#get-involved">{t("Host with us")}</Link>
-            <Link to="/community#welcome">{t("About IMC")}</Link>
           </FooterCol>
           <FooterCol title={t("Contact")}>
             <Link to={CONTACT.whatsapp} className="inline-flex items-center gap-2"><MessageCircle className="h-4 w-4" /> {CONTACT.phone}</Link>
@@ -266,9 +273,11 @@ export function Footer() {
       <div className="relative border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>{t("IMC is an independent community guide and is not affiliated with TTD. Made with care in Tirupati.")}</p>
-          <nav className="flex gap-4" aria-label="Legal">
+          <nav className="flex flex-wrap gap-x-4 gap-y-1" aria-label="Legal">
             <Link to="/privacy" className="hover:text-white">{t("Privacy")}</Link>
             <Link to="/terms" className="hover:text-white">{t("Terms")}</Link>
+            <Link to="/report?type=photo_removal" className="hover:text-white">{t("Photo removal")}</Link>
+            <Link to="/report" className="hover:text-white">{t("Report a concern")}</Link>
           </nav>
         </div>
       </div>
@@ -286,8 +295,10 @@ function FooterCol({ title, children }: { title: string; children: ReactNode }) 
 }
 
 const TABS = [
-  { to: "/", label: "Guide", icon: Home, match: (p: string) => p === "/" || p === "/visitor-guide" },
-  { to: "/experiences", label: "Explore", icon: Compass, match: (p: string) => p === "/experiences" || p === "/community" },
+  { to: "/", label: "Home", icon: Home, match: (p: string) => p === "/" },
+  { to: "/events", label: "Events", icon: CalendarDays, match: (p: string) => p.startsWith("/events") },
+  { to: "/communities", label: "People", icon: Users, match: (p: string) => p.startsWith("/communities") || p === "/join" || p === "/adda" },
+  { to: "/discover", label: "Discover", icon: Compass, match: (p: string) => p === "/discover" || p === "/visitor-guide" },
   { to: "/saved", label: "Saved", icon: Bookmark, match: (p: string) => p === "/saved" },
 ];
 
@@ -296,7 +307,7 @@ export function MobileTabBar() {
   const t = useT();
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden" aria-label="Quick">
-      <div className="mx-auto grid max-w-md grid-cols-3">
+      <div className="mx-auto grid max-w-md grid-cols-5">
         {TABS.map(({ to, label, icon: Icon, match }) => {
           const active = match(path);
           return (

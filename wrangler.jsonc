@@ -9,12 +9,23 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": ["/api/*", "/events/*", "/communities/*", "/stories/*"]
   },
   // Workers AI: free daily allowance; requests fail (and the site falls back) once it is used up.
   "ai": { "binding": "AI" },
+  // Community data: events, RSVPs, groups, members, Adda, opportunities, stories, submissions.
+  "d1_databases": [
+    { "binding": "DB", "database_name": "imc-community", "database_id": "01146fe8-92ed-4d9f-96db-b8c162ad7c51" }
+  ],
   "vars": {
-    "GUIDE_MODEL": "@cf/google/gemma-4-26b-a4b-it"
+    "GUIDE_MODEL": "@cf/google/gemma-4-26b-a4b-it",
+    // Only these emails may use the admin (Cloudflare Access sign-in).
+    "ADMIN_EMAILS": "itsmycommunity.tirupati@gmail.com",
+    // Fill both after creating the Access application (see CLAUDE.md); admin writes stay off until then.
+    "ACCESS_TEAM_DOMAIN": "",
+    "ACCESS_AUD": "",
+    // Turnstile site key (public). The secret goes in a Worker secret: TURNSTILE_SECRET.
+    "TURNSTILE_SITE_KEY": ""
   },
   "observability": { "enabled": true }
 }

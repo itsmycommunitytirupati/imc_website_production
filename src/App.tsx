@@ -1,14 +1,24 @@
-import { lazy, Suspense } from "react";
-import { Link, useLocation, navigate } from "./lib/router";
-import { useT } from "./lib/i18n";
+import { lazy, Suspense, useEffect } from "react";
+import { useLocation, navigate } from "./lib/router";
+import { trackReturnVisit } from "./lib/analytics";
 import { GopuramIcon, SiteShell } from "./site/ui";
 import HomePage from "./site/HomePage";
+import { NotFound } from "./site/kit";
 import MaintenancePage from "./components/Maintenance";
 import { IS_MAINTENANCE } from "./config/Maintenance";
 
 // Everything but the home page loads on demand, so the first visit stays fast.
-const CommunityPage = lazy(() => import("./site/CommunityPage"));
-const ExperiencesPage = lazy(() => import("./site/ExperiencesPage"));
+const DiscoverPage = lazy(() => import("./site/DiscoverPage"));
+const CommunitiesPage = lazy(() => import("./site/CommunityPage"));
+const GroupPage = lazy(() => import("./site/GroupPage"));
+const EventsPage = lazy(() => import("./site/EventsPage"));
+const EventPage = lazy(() => import("./site/EventPage"));
+const JoinPage = lazy(() => import("./site/JoinPage"));
+const AddaPage = lazy(() => import("./site/AddaPage"));
+const OpportunitiesPage = lazy(() => import("./site/OpportunitiesPage"));
+const StoriesPage = lazy(() => import("./site/StoriesPage"));
+const StoryPage = lazy(() => import("./site/StoryPage"));
+const ReportPage = lazy(() => import("./site/ReportPage"));
 const VisitorGuidePage = lazy(() => import("./site/VisitorGuidePage"));
 const SavedPage = lazy(() => import("./site/SavedPage"));
 const GuideApp = lazy(() => import("./guide/GuideApp"));
@@ -17,7 +27,7 @@ const LegalPage = lazy(() => import("./components/LegalPage"));
 
 // One build serves three surfaces. The hostname picks the surface in
 // production; /guide and /admin let previews and workers.dev reach them too.
-//   imctirupati.com        -> site (visitor guide, experiences, community)
+//   imctirupati.com        -> site (community home, events, discover)
 //   help.imctirupati.com   -> guide (AI assistant)
 //   admin.imctirupati.com  -> admin
 type Surface = "site" | "guide" | "admin";
@@ -30,6 +40,9 @@ function surfaceFor(host: string, path: string): Surface {
   return "site";
 }
 
+// Old addresses keep working after the brief's navigation change.
+const REDIRECTS: Record<string, string> = { "/experiences": "/events", "/community": "/communities" };
+
 function Loading() {
   return (
     <div className="grid min-h-[60vh] place-items-center" role="status" aria-label="Loading">
@@ -40,6 +53,21 @@ function Loading() {
 
 export default function App() {
   const { path } = useLocation();
+  useEffect(() => trackReturnVisit(), []);
+  useEffect(() => {
+    const to = REDIRECTS[path];
+    if (to) {
+      const q = new URLSearchParams(window.location.search);
+      const c = q.get("c");
+      if (c) {
+        q.delete("c");
+        q.set("category", c);
+      }
+      const qs = q.toString();
+      window.history.replaceState({}, "", `${to}${qs ? `?${qs}` : ""}${window.location.hash}`);
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    }
+  }, [path]);
   if (IS_MAINTENANCE) return <MaintenancePage />;
 
   const surface = surfaceFor(window.location.hostname, path);
@@ -61,31 +89,40 @@ export default function App() {
 }
 
 function SitePage({ path }: { path: string }) {
+  const [, section, slug, extra] = path.split("/");
+  if (extra) return <NotFound />;
+  if (slug) {
+    if (section === "events") return <EventPage slug={slug} />;
+    if (section === "communities") return <GroupPage slug={slug} />;
+    if (section === "stories") return <StoryPage slug={slug} />;
+    return <NotFound />;
+  }
   switch (path) {
     case "/":
       return <HomePage />;
+    case "/discover":
+      return <DiscoverPage />;
     case "/visitor-guide":
       return <VisitorGuidePage />;
+    case "/events":
     case "/experiences":
-      return <ExperiencesPage />;
+      return <EventsPage />;
+    case "/communities":
     case "/community":
-      return <CommunityPage />;
+      return <CommunitiesPage />;
+    case "/join":
+      return <JoinPage />;
+    case "/adda":
+      return <AddaPage />;
+    case "/opportunities":
+      return <OpportunitiesPage />;
+    case "/stories":
+      return <StoriesPage />;
+    case "/report":
+      return <ReportPage />;
     case "/saved":
       return <SavedPage />;
     default:
       return <NotFound />;
   }
-}
-
-function NotFound() {
-  const t = useT();
-  return (
-    <section className="mx-auto max-w-xl px-4 py-24 text-center">
-      <GopuramIcon className="mx-auto h-16 w-16 text-brand" />
-      <p className="mt-6 font-display text-7xl font-extrabold tracking-tighter text-brand">404</p>
-      <h1 className="mt-3 font-display text-2xl font-bold">{t("This page took a different ghat road.")}</h1>
-      <p className="mt-2 text-muted">{t("Let's get you back on the right path.")}</p>
-      <Link to="/" className="mt-8 inline-flex rounded-full bg-ink px-6 py-3 font-semibold text-white hover:bg-brand">{t("Back home")}</Link>
-    </section>
-  );
 }

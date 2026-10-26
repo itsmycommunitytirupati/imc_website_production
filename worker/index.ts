@@ -5,6 +5,9 @@ import { DEFAULT_MODEL, type Env, type ExecutionContext } from "./env";
 import { runGuide } from "./agent";
 import { MAX_QUESTION, isUnsafe, looksLikeInjection, rateLimited } from "./guardrails";
 import type { Message } from "./llm";
+import { handleCommunity } from "./community";
+import { handleAdmin } from "./admin";
+import { withShareMeta } from "./meta";
 
 const LANGS = new Set(["en", "te", "ta", "hi"]);
 const CACHE_SECONDS = 6 * 60 * 60;
@@ -79,6 +82,16 @@ export default {
     const { pathname } = new URL(request.url);
     if (pathname === "/api/guide") return handleGuide(request, env, ctx);
     if (pathname === "/api/health") return json({ ok: true, model: env.GUIDE_MODEL || DEFAULT_MODEL, search: env.TAVILY_API_KEY ? "tavily" : "wikipedia" });
+    try {
+      if (pathname.startsWith("/api/admin/")) return await handleAdmin(request, env, pathname);
+      if (pathname.startsWith("/api/")) return (await handleCommunity(request, env, pathname)) ?? json({ error: "not_found" }, 404);
+    } catch (err) {
+      console.error("api error", pathname, err instanceof Error ? err.message : err);
+      return json({ error: "server_error" }, 500);
+    }
+    // Event, community and story pages get real share previews.
+    const share = pathname.match(/^\/(events|communities|stories)\/([a-z0-9-]+)\/?$/);
+    if (share) return withShareMeta(request, env, share[1], share[2]);
     return env.ASSETS.fetch(request);
   },
 };
