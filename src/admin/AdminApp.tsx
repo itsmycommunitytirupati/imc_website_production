@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import {
   BarChart3, CalendarDays, Check, Download, ExternalLink, FileText, Flag, Images, Inbox, LayoutDashboard, Lock, Megaphone,
-  MessagesSquare, Pencil, Plus, RefreshCw, Ticket, UserPlus, Users, X,
+  MessagesSquare, Pencil, Plus, RefreshCw, Ticket, Upload, UserPlus, UserRound, Users, X,
 } from "lucide-react";
 import { usePageTitle } from "../lib/site";
-import { ApiError, api, formatTime, formatWhen, useApi } from "../lib/api";
+import { ApiError, api, formatTime, formatWhen, imageUrl, uploadImage, useApi } from "../lib/api";
 import { Logo } from "../site/ui";
 
 // Admin portal (admin.imctirupati.com, or /admin). Every request goes to /api/admin/*, which
@@ -12,12 +12,14 @@ import { Logo } from "../site/ui";
 // Nothing is deleted from here: unpublish, cancel or change a status instead.
 
 type Row = Record<string, unknown> & { id: number };
-type Tab = "overview" | "events" | "rsvps" | "groups" | "members" | "adda_posts" | "opportunities" | "stories" | "submissions" | "stats";
+type Tab = "overview" | "events" | "rsvps" | "gallery" | "team" | "groups" | "members" | "adda_posts" | "opportunities" | "stories" | "submissions" | "stats";
 
 const TABS: { id: Tab; label: string; Icon: typeof LayoutDashboard; badge?: keyof Overview }[] = [
   { id: "overview", label: "Overview", Icon: LayoutDashboard },
   { id: "events", label: "Events", Icon: CalendarDays },
   { id: "rsvps", label: "RSVPs", Icon: Ticket },
+  { id: "gallery", label: "Gallery", Icon: Images },
+  { id: "team", label: "Team", Icon: UserRound },
   { id: "groups", label: "Communities", Icon: Users },
   { id: "members", label: "Join requests", Icon: UserPlus, badge: "newMembers" },
   { id: "adda_posts", label: "Adda moderation", Icon: MessagesSquare, badge: "pendingAdda" },
@@ -76,6 +78,8 @@ export default function AdminApp() {
         {tab === "overview" && <OverviewTab data={overview.data} go={setTab} />}
         {tab === "events" && <Resource key="events" config={EVENTS} onChange={overview.reload} />}
         {tab === "rsvps" && <RsvpsTab />}
+        {tab === "gallery" && <Resource key="gallery" config={GALLERY} />}
+        {tab === "team" && <Resource key="team" config={TEAM} />}
         {tab === "groups" && <Resource key="groups" config={GROUPS} />}
         {tab === "members" && <Resource key="members" config={MEMBERS} onChange={overview.reload} />}
         {tab === "adda_posts" && <Resource key="adda" config={ADDA} onChange={overview.reload} />}
@@ -144,7 +148,7 @@ function OverviewTab({ data, go }: { data: Overview | null; go: (t: Tab) => void
 
 /* ------------------------------------------------------------------ generic resource */
 
-type FieldType = "text" | "textarea" | "number" | "datetime" | "date" | "select" | "checkbox" | "list" | "group";
+type FieldType = "text" | "textarea" | "number" | "datetime" | "date" | "select" | "checkbox" | "list" | "group" | "image" | "images";
 interface FieldDef {
   key: string;
   label: string;
@@ -164,6 +168,10 @@ interface ResourceConfig {
   filters?: { label: string; test: (r: Row) => boolean }[];
   quick?: (r: Row, save: (patch: Record<string, unknown>) => Promise<void>) => ReactNode;
   link?: (r: Row) => string | null;
+  /** Show rows as photo cards instead of a table. */
+  card?: (r: Row) => ReactNode;
+  /** Extra controls above the list (e.g. bulk photo upload); gets a reload callback. */
+  toolbar?: (reload: () => void) => ReactNode;
 }
 
 const yes = (v: unknown) => Number(v) === 1;
@@ -209,13 +217,28 @@ function Resource({ config, onChange }: { config: ResourceConfig; onChange?: () 
           ))}
         </div>
       )}
-      <div className="mt-5 overflow-x-auto rounded-2xl border border-line bg-white">
+      {config.toolbar?.(() => {
+        reload();
+        onChange?.();
+      })}
+      <div className={`mt-5 rounded-2xl ${config.card ? "" : "overflow-x-auto border border-line bg-white"}`}>
         {loading ? (
           <p className="p-6 text-muted">Loading…</p>
         ) : error ? (
           <p className="p-6 text-red-700">Couldn't load ({error.code}). <button onClick={reload} className="underline">Retry</button></p>
         ) : !rows.length ? (
           <p className="p-6 text-muted">Nothing here right now.</p>
+        ) : config.card ? (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
+            {rows.map((r) => (
+              <div key={r.id} className="overflow-hidden rounded-2xl border border-line bg-white">
+                <button onClick={() => setEditing(r)} className="block w-full text-left" aria-label="Edit">
+                  {config.card!(r)}
+                </button>
+                <div className="flex flex-wrap items-center gap-2 border-t border-line p-2">{config.quick?.(r, (patch) => save(r.id, patch))}</div>
+              </div>
+            ))}
+          </div>
         ) : (
           <table className="w-full min-w-[720px] text-sm">
             <thead className="bg-stone-50 text-left text-muted">
@@ -261,7 +284,7 @@ function Resource({ config, onChange }: { config: ResourceConfig; onChange?: () 
 }
 
 function toInput(f: FieldDef, v: unknown): unknown {
-  if (f.type === "list") {
+  if (f.type === "list" || f.type === "images") {
     try {
       const arr = typeof v === "string" ? JSON.parse(v || "[]") : v;
       return Array.isArray(arr) ? arr.join("\n") : "";
@@ -290,7 +313,7 @@ function Editor({ config, row, onClose, onSaved }: { config: ResourceConfig; row
     const body: Record<string, unknown> = {};
     for (const f of config.fields) {
       const v = values[f.key];
-      body[f.key] = f.type === "list" ? String(v ?? "").split("\n").map((s) => s.trim()).filter(Boolean) : f.type === "checkbox" ? (v ? 1 : 0) : v;
+      body[f.key] = f.type === "list" || f.type === "images" ? String(v ?? "").split("\n").map((s) => s.trim()).filter(Boolean) : f.type === "checkbox" ? (v ? 1 : 0) : v;
     }
     try {
       await api(row ? `/api/admin/${config.table}/${row.id}` : `/api/admin/${config.table}`, { method: row ? "PUT" : "POST", body: JSON.stringify(body) });
@@ -316,7 +339,16 @@ function Editor({ config, row, onClose, onSaved }: { config: ResourceConfig; row
           {config.fields.map((f) => {
             const v = values[f.key];
             const set = (nv: unknown) => setValues((s) => ({ ...s, [f.key]: nv }));
-            const wide = f.wide || f.type === "textarea" || f.type === "list";
+            const wide = f.wide || f.type === "textarea" || f.type === "list" || f.type === "images";
+            if (f.type === "image" || f.type === "images")
+              return (
+                <div key={f.key} className={wide ? "sm:col-span-2" : ""}>
+                  <span className="text-sm font-semibold">{f.label}</span>
+                  {f.type === "image" ? <ImageField value={String(v ?? "")} onChange={set} /> : <ImagesField value={String(v ?? "")} onChange={set} />}
+                  {f.help && <span className="mt-1 block text-xs text-muted">{f.help}</span>}
+                  {errors[f.key] && <span className="mt-1 block text-sm text-red-700">{errors[f.key]}</span>}
+                </div>
+              );
             return (
               <label key={f.key} className={`block ${wide ? "sm:col-span-2" : ""} ${f.type === "checkbox" ? "flex items-start gap-3" : ""}`}>
                 {f.type === "checkbox" ? (
@@ -360,6 +392,133 @@ function Editor({ config, row, onClose, onSaved }: { config: ResourceConfig; row
           <button disabled={busy} className="rounded-lg bg-brand px-5 py-2 font-semibold text-white disabled:opacity-60">{busy ? "Saving…" : "Save"}</button>
         </div>
       </form>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ photos */
+
+function UploadButton({ multiple = false, onFiles, busy, label = "Upload photo" }: { multiple?: boolean; onFiles: (files: File[]) => void; busy: boolean; label?: string }) {
+  const ref = useRef<HTMLInputElement>(null);
+  return (
+    <>
+      <input ref={ref} type="file" accept="image/jpeg,image/png,image/webp,image/heic" multiple={multiple} hidden onChange={(e) => {
+        const files = [...(e.target.files ?? [])];
+        e.target.value = "";
+        if (files.length) onFiles(files);
+      }} />
+      <button type="button" disabled={busy} onClick={() => ref.current?.click()} className="inline-flex items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-sm font-semibold hover:border-brand/50 disabled:opacity-60">
+        <Upload className="h-4 w-4" /> {busy ? "Uploading…" : label}
+      </button>
+    </>
+  );
+}
+
+const uploadError = (e: unknown) =>
+  e instanceof ApiError && e.code === "too_large" ? "That photo is too big even after shrinking." : e instanceof ApiError && e.status === 401 ? "Your sign-in expired. Reload the page." : "Upload failed. Try a JPEG or PNG.";
+
+function ImageField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const upload = async ([file]: File[]) => {
+    setBusy(true);
+    setErr("");
+    try {
+      onChange(await uploadImage(file));
+    } catch (e) {
+      setErr(uploadError(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="mt-1 flex items-start gap-3">
+      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-stone-100 ring-1 ring-line">
+        {value && <img src={imageUrl(value)} alt="" className="h-full w-full object-cover" />}
+      </div>
+      <div className="min-w-0 flex-1 space-y-2">
+        <UploadButton onFiles={upload} busy={busy} label={value ? "Replace photo" : "Upload photo"} />
+        <input value={value} onChange={(e) => onChange(e.target.value)} placeholder="or paste a link" className="w-full rounded-lg border border-line px-3 py-1.5 text-xs text-muted" />
+        {err && <p className="text-xs text-red-700">{err}</p>}
+      </div>
+    </div>
+  );
+}
+
+function ImagesField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const list = value.split("\n").map((s) => s.trim()).filter(Boolean);
+  const upload = async (files: File[]) => {
+    setBusy(true);
+    setErr("");
+    const added: string[] = [];
+    for (const f of files) {
+      try {
+        added.push(await uploadImage(f));
+      } catch (e) {
+        setErr(uploadError(e));
+      }
+    }
+    onChange([...list, ...added].join("\n"));
+    setBusy(false);
+  };
+  return (
+    <div className="mt-1 space-y-2">
+      <div className="flex flex-wrap gap-2">
+        {list.map((img, i) => (
+          <div key={`${img}-${i}`} className="relative h-20 w-20 overflow-hidden rounded-lg ring-1 ring-line">
+            <img src={imageUrl(img)} alt="" className="h-full w-full object-cover" />
+            {i === 0 && <span className="absolute left-1 top-1 rounded bg-ink px-1 text-[10px] font-bold text-white">Cover</span>}
+            <button type="button" onClick={() => onChange(list.filter((_, j) => j !== i).join("\n"))} aria-label="Remove photo" className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-white/90 text-ink"><X className="h-3 w-3" /></button>
+          </div>
+        ))}
+      </div>
+      <UploadButton multiple onFiles={upload} busy={busy} label="Add photos" />
+      {err && <p className="text-xs text-red-700">{err}</p>}
+    </div>
+  );
+}
+
+function GalleryUploader({ done }: { done: () => void }) {
+  const groups = useApi<{ rows: Row[] }>("/api/admin/groups");
+  const [groupId, setGroupId] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  const upload = async (files: File[]) => {
+    setBusy(true);
+    setMsg("");
+    let ok = 0;
+    for (const [i, f] of files.entries()) {
+      setMsg(`Uploading ${i + 1} of ${files.length}…`);
+      try {
+        const image = await uploadImage(f);
+        await api("/api/admin/gallery", {
+          method: "POST",
+          body: JSON.stringify({ image, caption: "", group_id: groupId ? Number(groupId) : null, consent_confirmed: consent ? 1 : 0, published: consent ? 1 : 0, sort: 100 }),
+        });
+        ok++;
+      } catch {
+        // Keep going; the summary says how many failed.
+      }
+    }
+    setBusy(false);
+    setMsg(`${ok} of ${files.length} uploaded${consent ? " and published" : " as hidden (confirm consent to publish)"}. Click a photo to add a caption.`);
+    done();
+  };
+  return (
+    <div className="mt-5 flex flex-wrap items-center gap-3 rounded-2xl border border-dashed border-brand/40 bg-brand-soft/40 p-4">
+      <select value={groupId} onChange={(e) => setGroupId(e.target.value)} className="rounded-lg border border-line bg-white px-3 py-2 text-sm">
+        <option value="">Community (optional)</option>
+        {groups.data?.rows.map((g) => <option key={g.id} value={g.id}>{String(g.name)}</option>)}
+      </select>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="h-4 w-4 accent-brand" />
+        Everyone identifiable agreed to be shown
+      </label>
+      <UploadButton multiple onFiles={upload} busy={busy} label="Upload photos" />
+      {msg && <p className="w-full text-sm text-muted">{msg}</p>}
     </div>
   );
 }
@@ -425,7 +584,7 @@ const EVENTS: ResourceConfig = {
     { key: "price_note", label: "Price note", help: "e.g. Includes breakfast" },
     { key: "capacity", label: "Capacity (0 = no limit)", type: "number" },
     { key: "organizer_name", label: "Host shown on page" },
-    { key: "image", label: "Image", help: "photo:<IMC photo key> or a full https:// URL", wide: true },
+    { key: "image", label: "Cover photo", type: "image", wide: true },
     { key: "first_timer_note", label: "Solo No More note", type: "textarea" },
     { key: "age_note", label: "Age note" },
     { key: "accessibility_note", label: "Accessibility note" },
@@ -461,7 +620,7 @@ const GROUPS: ResourceConfig = {
     { key: "owner_role", label: "Host role" },
     { key: "status", label: "Status", type: "select", options: ["active", "forming", "paused"] },
     { key: "sort", label: "Sort", type: "number" },
-    { key: "image", label: "Fallback image", wide: true },
+    { key: "image", label: "Cover photo (used when there's no logo)", type: "image", wide: true },
     { key: "joining_note", label: "Who it's for", wide: true },
     { key: "published", label: "Published", type: "checkbox" },
     { key: "is_sample", label: "Sample (shows a badge)", type: "checkbox" },
@@ -571,6 +730,83 @@ const OPPORTUNITIES: ResourceConfig = {
   ],
 };
 
+const GALLERY: ResourceConfig = {
+  table: "gallery",
+  title: "Gallery",
+  intro: "Photos on the site's gallery and the Communities photo wall. Upload many at once; photos only appear once consent is confirmed. Click a photo to caption it.",
+  create: true,
+  defaults: { published: 0, consent_confirmed: 0, sort: 100 },
+  toolbar: (reload) => <GalleryUploader done={reload} />,
+  filters: [
+    { label: "All", test: () => true },
+    { label: "On the site", test: (r) => yes(r.published) && yes(r.consent_confirmed) },
+    { label: "Hidden", test: (r) => !yes(r.published) || !yes(r.consent_confirmed) },
+  ],
+  columns: [],
+  card: (r) => (
+    <>
+      <img src={imageUrl(String(r.image))} alt="" loading="lazy" className="aspect-square w-full object-cover" />
+      <span className="block p-2 text-xs">
+        <span className="line-clamp-1 font-semibold">{String(r.caption || "Add a caption")}</span>
+        <span className="mt-1 flex flex-wrap gap-1">
+          {yes(r.published) && yes(r.consent_confirmed) ? <Pill tone="green">on site</Pill> : <Pill>hidden</Pill>}
+          {!yes(r.consent_confirmed) && <Pill tone="red">no consent</Pill>}
+        </span>
+      </span>
+    </>
+  ),
+  quick: (r, save) =>
+    yes(r.published) ? (
+      <QuickButton onClick={() => save({ published: 0 })}>Hide</QuickButton>
+    ) : (
+      <QuickButton onClick={() => save({ published: 1 })}>Show</QuickButton>
+    ),
+  fields: [
+    { key: "image", label: "Photo", type: "image", wide: true },
+    { key: "caption", label: "Caption", wide: true },
+    { key: "alt", label: "Describe the photo (for screen readers)", wide: true },
+    { key: "group_id", label: "Community", type: "group" },
+    { key: "taken_on", label: "Taken on", type: "date" },
+    { key: "sort", label: "Order (lower shows first)", type: "number" },
+    { key: "consent_confirmed", label: "Everyone identifiable agreed to be shown", type: "checkbox", help: "Required to publish. Hide it right away if anyone asks." },
+    { key: "published", label: "Show on the site", type: "checkbox" },
+  ],
+};
+
+const TEAM: ResourceConfig = {
+  table: "team",
+  title: "Team",
+  intro: "The people behind IMC, shown on the Team page and the Communities page. Order controls who appears first.",
+  create: true,
+  defaults: { kind: "captain", published: 1, sort: 50 },
+  columns: [
+    {
+      label: "Person",
+      render: (r) => (
+        <span className="flex items-center gap-3">
+          <img src={imageUrl(String(r.photo || ""))} alt="" className="h-10 w-10 rounded-full object-cover" />
+          <span><span className="block font-semibold">{String(r.name)}</span><span className="text-xs text-muted">{String(r.role)}</span></span>
+        </span>
+      ),
+    },
+    { label: "Type", render: (r) => <Pill tone="blue">{String(r.kind)}</Pill> },
+    { label: "Order", render: (r) => String(r.sort) },
+    { label: "Shown", render: (r) => (yes(r.published) ? <Pill tone="green">yes</Pill> : <Pill>hidden</Pill>) },
+  ],
+  quick: (r, save) => (yes(r.published) ? <QuickButton onClick={() => save({ published: 0 })}>Hide</QuickButton> : <QuickButton onClick={() => save({ published: 1 })}>Show</QuickButton>),
+  fields: [
+    { key: "name", label: "Name" },
+    { key: "role", label: "Role", help: "e.g. Captain · Cricket Club" },
+    { key: "kind", label: "Type", type: "select", options: ["core", "captain", "host", "volunteer"] },
+    { key: "group_id", label: "Community", type: "group" },
+    { key: "photo", label: "Photo", type: "image", wide: true },
+    { key: "bio", label: "Short bio (optional)", type: "textarea" },
+    { key: "instagram", label: "Instagram handle (optional)", help: "Without the @" },
+    { key: "sort", label: "Order (lower shows first)", type: "number" },
+    { key: "published", label: "Show on the site", type: "checkbox", help: "Only with the person's agreement." },
+  ],
+};
+
 const STORIES: ResourceConfig = {
   table: "stories",
   title: "Stories",
@@ -589,7 +825,7 @@ const STORIES: ResourceConfig = {
     { key: "title", label: "Title", wide: true },
     { key: "summary", label: "Summary", wide: true },
     { key: "body", label: "Story", type: "textarea" },
-    { key: "photos", label: "Photos (one per line)", type: "list", help: "IMC photo keys (e.g. hilltop) or full https:// URLs. The first is the cover." },
+    { key: "photos", label: "Photos", type: "images", help: "The first photo is the cover." },
     { key: "group_id", label: "Community", type: "group" },
     { key: "event_date", label: "Event date", type: "date" },
     { key: "status", label: "Status", type: "select", options: ["draft", "published", "removed"] },

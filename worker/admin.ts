@@ -1,7 +1,9 @@
 // Admin API: Cloudflare Access sign-in, then create / edit / moderate community content.
-// Writes are refused until ACCESS_TEAM_DOMAIN and ACCESS_AUD are configured (except on localhost).
+// Writes are refused until ACCESS_TEAM_DOMAIN and ACCESS_AUD are configured. Local `wrangler dev`
+// can skip the sign-in with ADMIN_DEV_BYPASS=1 in .dev.vars (never deployed, git-ignored).
 import type { Env } from "./env";
 import { int, json, readJson, slugify, str } from "./http";
+import { MAX_UPLOAD, storeMedia } from "./media";
 
 // ------------------------------------------------------------------ auth
 
@@ -46,8 +48,7 @@ async function verifyAccessJwt(token: string, env: Env): Promise<string | null> 
 type Auth = { email: string } | { error: string; status: number };
 
 async function authenticate(request: Request, env: Env): Promise<Auth> {
-  const host = new URL(request.url).hostname;
-  if (host === "localhost" || host === "127.0.0.1") return { email: "dev@localhost" };
+  if (env.ADMIN_DEV_BYPASS === "1") return { email: "dev@localhost" };
   if (!env.ACCESS_TEAM_DOMAIN || !env.ACCESS_AUD) return { error: "not_configured", status: 503 };
   const cookie = request.headers.get("cookie")?.match(/CF_Authorization=([^;]+)/)?.[1];
   const token = request.headers.get("cf-access-jwt-assertion") ?? cookie;
@@ -112,19 +113,35 @@ const TABLES: Record<string, TableSpec> = {
     order: "published, created_at DESC",
     create: true,
   },
+  gallery: {
+    columns: ["image", "caption", "alt", "group_id", "taken_on", "consent_confirmed", "published", "sort"],
+    required: ["image"],
+    ints: ["group_id", "consent_confirmed", "published", "sort"],
+    order: "created_at DESC, sort",
+    create: true,
+  },
+  team: {
+    columns: ["name", "role", "kind", "group_id", "photo", "bio", "instagram", "published", "sort"],
+    required: ["name"],
+    ints: ["group_id", "published", "sort"],
+    order: "sort, name",
+    create: true,
+  },
   submissions: { columns: ["status", "admin_note"], order: "created_at DESC" },
   members: { columns: ["status"], order: "created_at DESC" },
   rsvps: { columns: ["status"], ints: [], order: "created_at DESC" },
 };
 
-const HAS_UPDATED_AT = new Set(["events", "groups", "stories", "opportunities", "adda_posts", "submissions"]);
+const HAS_UPDATED_AT = new Set(["events", "groups", "stories", "opportunities", "adda_posts", "submissions", "gallery", "team"]);
 
 function coerce(spec: TableSpec, body: Record<string, unknown>, onlyPresent: boolean) {
   const out: Record<string, unknown> = {};
   for (const col of spec.columns) {
     if (onlyPresent && !(col in body)) continue;
     const v = body[col];
-    if (spec.ints?.includes(col)) out[col] = v === null || v === "" ? (col === "group_id" ? null : 0) : int(v);
+    // A missing or 0 community means "none" (0 would break the foreign key).
+    if (col === "group_id") out[col] = v === null || v === undefined || v === "" || Number(v) === 0 ? null : int(v);
+    else if (spec.ints?.includes(col)) out[col] = v === null || v === "" ? 0 : int(v);
     else if (spec.jsonCols?.includes(col)) out[col] = JSON.stringify(Array.isArray(v) ? v : []);
     else out[col] = str(v, 4000);
   }
@@ -137,6 +154,9 @@ function check(table: string, row: Record<string, unknown>, spec: TableSpec, cre
   if (table === "events" && row.start_at && !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(String(row.start_at))) fields.start_at = "Use date and time.";
   if (table === "stories" && row.status === "published" && Number(row.consent_confirmed) !== 1)
     fields.consent_confirmed = "Confirm consent from everyone identifiable before publishing.";
+  if (table === "gallery" && Number(row.published) === 1 && Number(row.consent_confirmed) !== 1)
+    fields.consent_confirmed = "Confirm consent from everyone identifiable before publishing.";
+  if (table === "team" && row.kind !== undefined && !["core", "captain", "host", "volunteer"].includes(String(row.kind))) fields.kind = "Pick a role type.";
   return fields;
 }
 
@@ -192,6 +212,16 @@ export async function handleAdmin(request: Request, env: Env, path: string): Pro
       } else await env.DB.prepare("DELETE FROM settings WHERE key = 'stats'").run();
       return json({ ok: true });
     }
+  }
+
+  // Photo upload: raw image body (the admin resizes to WebP first). Returns the value to store.
+  if (method === "POST" && seg[2] === "media") {
+    const type = (request.headers.get("content-type") ?? "").split(";")[0].trim();
+    const size = Number(request.headers.get("content-length") ?? 0);
+    if (size > MAX_UPLOAD) return json({ error: "too_large" }, 413);
+    const key = await storeMedia(env, await request.arrayBuffer(), type);
+    if (!key) return json({ error: "bad_image" }, 422);
+    return json({ ok: true, image: `media:${key}`, url: `/media/${key}` });
   }
 
   const table = seg[2];
@@ -253,8 +283,10 @@ export async function handleAdmin(request: Request, env: Env, path: string): Pro
   if (method === "PUT" && id !== null && id > 0) {
     const body = (await readJson(request)) ?? {};
     const row = coerce(spec, body, true);
-    if (table === "stories" && row.status === "published" && !("consent_confirmed" in row)) {
-      const current = await env.DB.prepare("SELECT consent_confirmed FROM stories WHERE id = ?").bind(id).first<{ consent_confirmed: number }>();
+    // Publishing checks consent even when only the status/published flag is sent.
+    const publishing = (table === "stories" && row.status === "published") || (table === "gallery" && Number(row.published) === 1);
+    if (publishing && !("consent_confirmed" in row)) {
+      const current = await env.DB.prepare(`SELECT consent_confirmed FROM ${table} WHERE id = ?`).bind(id).first<{ consent_confirmed: number }>();
       row.consent_confirmed = current?.consent_confirmed ?? 0;
     }
     const fields = check(table, row, spec, false);

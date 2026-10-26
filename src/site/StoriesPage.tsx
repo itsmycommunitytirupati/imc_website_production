@@ -25,7 +25,14 @@ export default function StoriesPage() {
             {data.stories.map((s) => <StoryCard key={s.slug} s={s} />)}
           </div>
         )}
-        <div className="mt-10 rounded-3xl bg-white p-6 text-center ring-1 ring-line">
+        <Link to="/gallery" className="mt-10 flex items-center justify-between gap-4 rounded-3xl bg-ink p-6 text-white transition hover:bg-brand">
+          <span>
+            <span className="block font-display text-2xl font-extrabold">{t("See the full gallery")}</span>
+            <span className="text-white/75">{t("Every photo from every meetup, by community.")}</span>
+          </span>
+          <span aria-hidden="true" className="text-3xl">→</span>
+        </Link>
+        <div className="mt-6 rounded-3xl bg-white p-6 text-center ring-1 ring-line">
           <p className="font-semibold">{t("Spotted yourself? Tag a friend, or ask us to take it down.")}</p>
           <p className="mt-1 text-sm text-muted">{t("We remove any photo on request, no questions asked.")}</p>
           <Link to="/report?type=photo_removal" className="mt-4 inline-flex rounded-full bg-ink px-5 py-3 font-semibold text-white hover:bg-brand">{t("Request photo removal")}</Link>

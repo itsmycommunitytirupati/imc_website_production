@@ -8,6 +8,7 @@ import type { Message } from "./llm";
 import { handleCommunity } from "./community";
 import { handleAdmin } from "./admin";
 import { withShareMeta } from "./meta";
+import { serveMedia } from "./media";
 
 const LANGS = new Set(["en", "te", "ta", "hi"]);
 const CACHE_SECONDS = 6 * 60 * 60;
@@ -81,6 +82,7 @@ export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const { pathname } = new URL(request.url);
     if (pathname === "/api/guide") return handleGuide(request, env, ctx);
+    if (pathname.startsWith("/media/")) return serveMedia(request, env, ctx, pathname.slice(7));
     if (pathname === "/api/health") return json({ ok: true, model: env.GUIDE_MODEL || DEFAULT_MODEL, search: env.TAVILY_API_KEY ? "tavily" : "wikipedia" });
     try {
       if (pathname.startsWith("/api/admin/")) return await handleAdmin(request, env, pathname);

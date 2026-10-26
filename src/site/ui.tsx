@@ -111,9 +111,9 @@ export function LanguageMenu({ className = "", dark = false }: { className?: str
 const NAV = [
   { to: "/discover", label: "Discover", match: ["/discover", "/visitor-guide"] },
   { to: "/events", label: "Events", match: ["/events"] },
-  { to: "/communities", label: "Communities", match: ["/communities", "/adda"] },
+  { to: "/communities", label: "Communities", match: ["/communities", "/adda", "/team"] },
   { to: "/opportunities", label: "Opportunities", match: ["/opportunities"] },
-  { to: "/stories", label: "Stories", match: ["/stories"] },
+  { to: "/stories", label: "Stories", match: ["/stories", "/gallery"] },
 ];
 const isActive = (path: string, prefixes: string[]) => prefixes.some((p) => path === p || path.startsWith(`${p}/`));
 
@@ -185,7 +185,7 @@ export function Header() {
 function MobileMenu({ path }: { path: string }) {
   const t = useT();
   const [lang] = useLang();
-  const items = [{ to: "/", label: "Home" }, ...NAV, { to: "/adda", label: "Tirupati Adda" }, { to: "/join", label: "Join IMC" }, { to: "/saved", label: "Saved" }];
+  const items = [{ to: "/", label: "Home" }, ...NAV, { to: "/gallery", label: "Gallery" }, { to: "/adda", label: "Tirupati Adda" }, { to: "/team", label: "Our team" }, { to: "/join", label: "Join IMC" }, { to: "/saved", label: "Saved" }];
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -254,6 +254,8 @@ export function Footer() {
             <Link to="/adda">{t("Tirupati Adda")}</Link>
             <Link to="/opportunities">{t("Opportunities")}</Link>
             <Link to="/stories">{t("Stories")}</Link>
+            <Link to="/gallery">{t("Gallery")}</Link>
+            <Link to="/team">{t("Our team")}</Link>
             <Link to="/join">{t("Join IMC")}</Link>
           </FooterCol>
           <FooterCol title={t("Visit")}>
@@ -297,7 +299,7 @@ function FooterCol({ title, children }: { title: string; children: ReactNode }) 
 const TABS = [
   { to: "/", label: "Home", icon: Home, match: (p: string) => p === "/" },
   { to: "/events", label: "Events", icon: CalendarDays, match: (p: string) => p.startsWith("/events") },
-  { to: "/communities", label: "People", icon: Users, match: (p: string) => p.startsWith("/communities") || p === "/join" || p === "/adda" },
+  { to: "/communities", label: "People", icon: Users, match: (p: string) => p.startsWith("/communities") || p === "/join" || p === "/adda" || p === "/team" },
   { to: "/discover", label: "Discover", icon: Compass, match: (p: string) => p === "/discover" || p === "/visitor-guide" },
   { to: "/saved", label: "Saved", icon: Bookmark, match: (p: string) => p === "/saved" },
 ];

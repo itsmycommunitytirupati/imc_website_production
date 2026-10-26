@@ -7,3 +7,6 @@ coverage/
 .env*
 !.env.example
 .wrangler/
+
+# Local-only Worker variables (wrangler dev)
+.dev.vars

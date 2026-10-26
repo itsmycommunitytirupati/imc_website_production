@@ -291,6 +291,29 @@ export async function handleCommunity(request: Request, env: Env, path: string):
     return json({ ok: true, status: "pending" });
   }
 
+  // ---------------------------------------------------------------- gallery and team
+  if (method === "GET" && path === "/api/gallery") {
+    const group = str(url.searchParams.get("group"), 60);
+    const limit = Math.min(int(url.searchParams.get("limit"), 120), 300);
+    const { results } = await env.DB.prepare(
+      `SELECT p.id, p.image, p.caption, p.alt, p.taken_on, g.slug AS group_slug, g.name AS group_name
+       FROM gallery p LEFT JOIN groups g ON g.id = p.group_id
+       WHERE p.published = 1 AND p.consent_confirmed = 1 ${group ? "AND g.slug = ?" : ""}
+       ORDER BY p.created_at DESC, p.sort LIMIT ${limit}`,
+    )
+      .bind(...(group ? [group] : []))
+      .all();
+    return json({ photos: results });
+  }
+
+  if (method === "GET" && path === "/api/team") {
+    const { results } = await env.DB.prepare(
+      `SELECT t.id, t.name, t.role, t.kind, t.photo, t.bio, t.instagram, g.slug AS group_slug, g.name AS group_name
+       FROM team t LEFT JOIN groups g ON g.id = t.group_id WHERE t.published = 1 ORDER BY t.sort, t.name`,
+    ).all();
+    return json({ team: results });
+  }
+
   // ---------------------------------------------------------------- stories
   if (method === "GET" && path === "/api/stories") {
     const { results } = await env.DB.prepare(

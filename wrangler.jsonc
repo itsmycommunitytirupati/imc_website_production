@@ -11,7 +11,7 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api/*", "/events/*", "/communities/*", "/stories/*"]
+    "run_worker_first": ["/api/*", "/media/*", "/events/*", "/communities/*", "/stories/*"]
   },
   // Workers AI: free daily allowance; requests fail (and the site falls back) once it is used up.
   "ai": { "binding": "AI" },
@@ -19,6 +19,8 @@
   "d1_databases": [
     { "binding": "DB", "database_name": "imc-community", "database_id": "01146fe8-92ed-4d9f-96db-b8c162ad7c51" }
   ],
+  // Photos uploaded from the admin (gallery, team, events), served at /media/<key>.
+  "kv_namespaces": [{ "binding": "MEDIA", "id": "b569266935bc4145ac091b0f81901d6d" }],
   "vars": {
     "GUIDE_MODEL": "@cf/google/gemma-4-26b-a4b-it",
     // Only these emails may use the admin (Cloudflare Access sign-in).

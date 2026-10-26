@@ -8,6 +8,8 @@ export interface Env {
   TAVILY_API_KEY?: string;
   /** Community data (migrations/). */
   DB: D1Database;
+  /** Uploaded photos (admin), served at /media/<key>. */
+  MEDIA: KVNamespace;
   /** Comma-separated emails allowed into the admin. */
   ADMIN_EMAILS?: string;
   /** Cloudflare Access team domain (e.g. "imc-tirupati") and application AUD tag. */
@@ -15,6 +17,8 @@ export interface Env {
   ACCESS_AUD?: string;
   /** Turnstile: public site key (var) and secret (Worker secret). Forms skip the check until set. */
   TURNSTILE_SITE_KEY?: string;
+  /** Local dev only (.dev.vars): skip the Access sign-in for the admin API. */
+  ADMIN_DEV_BYPASS?: string;
   TURNSTILE_SECRET?: string;
 }
 
@@ -32,6 +36,14 @@ export interface D1PreparedStatement {
 export interface D1Database {
   prepare(query: string): D1PreparedStatement;
   batch(statements: D1PreparedStatement[]): Promise<D1Result[]>;
+}
+
+// Minimal KV types.
+export interface KVNamespace {
+  get(key: string, type: "arrayBuffer"): Promise<ArrayBuffer | null>;
+  getWithMetadata<M>(key: string, type: "arrayBuffer"): Promise<{ value: ArrayBuffer | null; metadata: M | null }>;
+  put(key: string, value: ArrayBuffer, options?: { metadata?: Record<string, unknown> }): Promise<void>;
+  delete(key: string): Promise<void>;
 }
 
 export interface ExecutionContext {

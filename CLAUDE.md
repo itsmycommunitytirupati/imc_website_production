@@ -30,6 +30,8 @@ Site routes (switch in `App.tsx`; dynamic segments are split by hand):
 | `/opportunities` | `OpportunitiesPage.tsx` | Board, post form, propose-an-event form (`#propose`) |
 | `/stories`, `/stories/:slug` | `StoriesPage.tsx`, `StoryPage.tsx` | Memory wall; removal links |
 | `/report` | `ReportPage.tsx` | `?type=photo_removal` or report; `?about=` prefills |
+| `/gallery` | `GalleryPage.tsx` | Photos from the admin (consented only), community filter, lightbox with removal link |
+| `/team` | `TeamPage.tsx` | Core team, captains, hosts, volunteers from the admin |
 | `/saved` | `SavedPage.tsx` | Bookmarked events (device only) |
 | `/privacy`, `/terms` | old `LegalPage` | |
 
@@ -95,7 +97,8 @@ the page falls back to the curated answers in `content/guide.ts`.
 ## Community backend (D1 + Worker API)
 
 - **Database:** D1 `imc-community` (binding `DB`, id in `wrangler.jsonc`). Schema and seed in
-  `migrations/` (0001 schema, 0002 sample seed, 0003 official community names, 0004 interest ids).
+  `migrations/` (0001 schema, 0002 sample seed, 0003 official community names, 0004 interest ids,
+  0005 gallery + team seeded with IMC's existing 31 photos and 19 team members).
   Apply with `npx wrangler d1 migrations apply imc-community --local` (dev) or `--remote` (live).
   Add new migrations as numbered files; never edit applied ones.
 - **Public API (`worker/community.ts`):** `GET /api/events|groups|adda|opportunities|stories|stats|config`,
@@ -106,8 +109,17 @@ the page falls back to the curated answers in `content/guide.ts`.
   repeat RSVPs return the existing booking.
 - **Admin API (`worker/admin.ts`):** `/api/admin/*`, Cloudflare Access JWT checked against
   `ACCESS_TEAM_DOMAIN` + `ACCESS_AUD`, email must be in `ADMIN_EMAILS`. Until those vars are set it
-  answers 503 `not_configured` (localhost is allowed for dev). No deletes: unpublish or change status.
+  answers 503 `not_configured`. Access app "IMC Admin" (team `bold-cherry-7506`) guards
+  `admin.imctirupati.com` (Worker custom domain); its login method is One-time PIN. No deletes: unpublish or change status.
   Stories cannot be published without `consent_confirmed = 1`.
+- **Photos (`worker/media.ts`):** admin uploads go to the `MEDIA` KV namespace (R2 isn't enabled
+  on the account) and are served at `/media/<yyyy-mm>/<random>.webp`, cached for a year. The admin
+  shrinks photos in the browser to WebP (longest side 1600 px) before upload; limit 4 MB. Image
+  fields store `photo:<key>` (bundled `assets/photos`), `team:<slug>` (bundled `assets/team`, made by
+  `scripts/import-team.mjs`), `media:<key>` (uploads) or a full URL; `imageUrl()` resolves all four.
+- **Gallery and team:** `GET /api/gallery?group=` (published and consent-confirmed only) and
+  `GET /api/team`. The admin's Gallery tab bulk-uploads with a consent checkbox; photos without
+  consent stay hidden. The Communities photo wall and team strip, group pages and `/gallery` read them.
 - **Share previews (`worker/meta.ts`):** `/events/*`, `/communities/*`, `/stories/*` run the Worker
   first (`run_worker_first`) to rewrite title/description/og tags from D1.
 - **Sample content:** every seeded row has `is_sample = 1` and shows a **Sample** badge. IMC
@@ -119,7 +131,9 @@ the page falls back to the curated answers in `content/guide.ts`.
   `select_interests`, `submit_idea`, `submit_opportunity`, `share_event`, `return_visit`). Never send
   names, contacts or free text.
 - **Local dev:** `npx wrangler dev --port 8787` and `npm run dev`; open `http://127.0.0.1:3000`
-  (on this machine another app answers on `localhost:3000` over IPv6).
+  (on this machine another app answers on `localhost:3000` over IPv6). The admin API needs
+  `ADMIN_DEV_BYPASS=1` in a git-ignored `.dev.vars` to skip the Access sign-in locally (the
+  attached custom domain makes `wrangler dev` report that hostname, so there is no localhost check).
 
 ## Commands
 

@@ -2,7 +2,7 @@ import { ArrowLeft, CalendarDays, Info, UserRound } from "lucide-react";
 import { Link } from "../lib/router";
 import { usePageTitle } from "../lib/site";
 import { useT } from "../lib/i18n";
-import { imageUrl, useApi, type EventItem, type GroupItem, type StoryItem } from "../lib/api";
+import { imageUrl, useApi, type EventItem, type GalleryPhoto, type GroupItem, type StoryItem } from "../lib/api";
 import { logoFor } from "../content/logos";
 import { EmptyState, ErrorState, EventCard, GroupLogo, NotFound, SampleBadge, ShareButton, StoryCard } from "./kit";
 import { JoinForm, INTERESTS } from "./JoinPage";
@@ -11,6 +11,7 @@ export default function GroupPage({ slug }: { slug: string }) {
   const t = useT();
   const { data, loading, error, reload } = useApi<{ group: GroupItem; events: EventItem[]; stories: StoryItem[] }>(`/api/groups/${slug}`);
   const g = data?.group;
+  const gallery = useApi<{ photos: GalleryPhoto[] }>(`/api/gallery?group=${slug}&limit=8`);
   usePageTitle(g ? `${g.name} | IMC Tirupati` : "Community | IMC Tirupati", g?.tagline);
 
   if (loading) return <div className="mx-auto h-[70vh] max-w-7xl animate-pulse px-4 py-10 sm:px-6"><div className="h-64 rounded-3xl bg-stone-200" /></div>;
@@ -72,6 +73,18 @@ export default function GroupPage({ slug }: { slug: string }) {
               <EmptyState title={t("Next meetup being planned")} action={<Link to="/opportunities#propose" className="font-semibold text-brand underline">{t("Propose one")}</Link>} />
             )}
           </div>
+
+          {(gallery.data?.photos.length ?? 0) > 0 && (
+            <>
+              <div className="mt-12 flex items-end justify-between gap-4">
+                <h2 className="font-display text-2xl font-extrabold">{t("Photos")}</h2>
+                <Link to="/gallery" className="text-sm font-semibold text-brand hover:underline">{t("Full gallery")}</Link>
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {gallery.data!.photos.map((p) => <img key={p.id} src={imageUrl(p.image)} alt={p.alt || p.caption} loading="lazy" className="aspect-square w-full rounded-2xl object-cover" />)}
+              </div>
+            </>
+          )}
 
           {data.stories.length > 0 && (
             <>

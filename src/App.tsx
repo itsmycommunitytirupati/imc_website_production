@@ -19,6 +19,8 @@ const OpportunitiesPage = lazy(() => import("./site/OpportunitiesPage"));
 const StoriesPage = lazy(() => import("./site/StoriesPage"));
 const StoryPage = lazy(() => import("./site/StoryPage"));
 const ReportPage = lazy(() => import("./site/ReportPage"));
+const GalleryPage = lazy(() => import("./site/GalleryPage"));
+const TeamPage = lazy(() => import("./site/TeamPage"));
 const VisitorGuidePage = lazy(() => import("./site/VisitorGuidePage"));
 const SavedPage = lazy(() => import("./site/SavedPage"));
 const GuideApp = lazy(() => import("./guide/GuideApp"));
@@ -120,6 +122,10 @@ function SitePage({ path }: { path: string }) {
       return <StoriesPage />;
     case "/report":
       return <ReportPage />;
+    case "/gallery":
+      return <GalleryPage />;
+    case "/team":
+      return <TeamPage />;
     case "/saved":
       return <SavedPage />;
     default:

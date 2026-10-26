@@ -89,6 +89,28 @@ export interface AddaPost {
   created_at: string;
 }
 
+export interface GalleryPhoto {
+  id: number;
+  image: string;
+  caption: string;
+  alt: string;
+  taken_on: string;
+  group_slug: string | null;
+  group_name: string | null;
+}
+
+export interface TeamMember {
+  id: number;
+  name: string;
+  role: string;
+  kind: "core" | "captain" | "host" | "volunteer";
+  photo: string;
+  bio: string;
+  instagram: string;
+  group_slug: string | null;
+  group_name: string | null;
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -132,16 +154,45 @@ export function useApi<T>(path: string | null) {
   return { ...state, reload };
 }
 
-/** Database image values are either "photo:<IMC photo key>" or a full URL. */
+// Team portraits bundled with the site (assets/team, made by scripts/import-team.mjs).
+const TEAM_FILES = import.meta.glob("../../assets/team/*.webp", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
+
+/** Database image values: "photo:<IMC photo key>", "team:<slug>", "media:<uploaded key>" or a full URL. */
 export function imageUrl(value: string | undefined | null, fallback = IMC_PHOTOS.meetup) {
   if (!value) return fallback;
-  if (value.startsWith("http")) return value;
+  if (value.startsWith("http") || value.startsWith("/")) return value;
+  if (value.startsWith("media:")) return `/media/${value.slice(6)}`;
+  if (value.startsWith("team:")) return TEAM_FILES[`../../assets/team/${value.slice(5)}.webp`] ?? fallback;
   const key = value.replace(/^photo:/, "") as keyof typeof IMC_PHOTOS;
   return IMC_PHOTOS[key] ?? fallback;
 }
 
 export function photoUrl(key: string) {
   return imageUrl(key.includes(":") || key.startsWith("http") ? key : `photo:${key}`);
+}
+
+/** Shrinks a photo in the browser (longest side `max`, WebP) so uploads stay small. */
+export async function shrinkImage(file: File, max = 1600, quality = 0.82): Promise<Blob> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", quality));
+  // Browsers without WebP encoding fall back to JPEG.
+  if (blob && blob.type === "image/webp") return blob;
+  return new Promise<Blob>((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("encode"))), "image/jpeg", quality));
+}
+
+/** Uploads a photo through the admin API; returns the value to store (e.g. "media:2026-10/abc.webp"). */
+export async function uploadImage(file: File): Promise<string> {
+  const blob = await shrinkImage(file);
+  const res = await fetch("/api/admin/media", { method: "POST", headers: { "content-type": blob.type }, body: blob });
+  const data = (await res.json().catch(() => ({}))) as { image?: string; error?: string };
+  if (!res.ok || !data.image) throw new ApiError(res.status, data.error ?? "upload_failed");
+  return data.image;
 }
 
 // Dates are stored as Tirupati local time ("YYYY-MM-DDTHH:MM").

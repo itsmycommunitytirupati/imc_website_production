@@ -5,7 +5,7 @@ import { CONTACT, usePageTitle } from "../lib/site";
 import { FAQS, PASSION_CARDS, POSTER_STYLES } from "../content/community";
 import { IMC_PHOTOS, WALL } from "../content/photos";
 import { TESTIMONIALS } from "../data";
-import { formatWhen, imageUrl, priceLabel, useApi, type EventItem, type GroupItem } from "../lib/api";
+import { formatWhen, imageUrl, priceLabel, useApi, type EventItem, type GalleryPhoto, type GroupItem, type TeamMember } from "../lib/api";
 import { ErrorState, GroupCard, LoadingCards, SampleBadge } from "./kit";
 import { GopuramIcon, Logo } from "./ui";
 import Reveal from "./Reveal";
@@ -41,6 +41,7 @@ export default function CommunityPage() {
       <WhatsAppPocket />
       <Passion />
       <Social />
+      <TeamTeaser />
       <Voices />
       <Faq />
       <SeeYou />
@@ -126,7 +127,11 @@ function Ticker() {
 
 function PhotoWall() {
   const t = useT();
-  const cols = [0, 1, 2, 3, 4].map((c) => WALL.filter((_, i) => i % 5 === c));
+  // Gallery photos from the admin; the bundled set covers loading and an empty gallery.
+  const { data } = useApi<{ photos: GalleryPhoto[] }>("/api/gallery?limit=40");
+  const live = data?.photos.map((p) => imageUrl(p.image)) ?? [];
+  const wall = live.length >= 10 ? live : WALL;
+  const cols = [0, 1, 2, 3, 4].map((c) => wall.filter((_, i) => i % 5 === c));
   return (
     <section id="welcome" className="relative h-[640px] overflow-hidden bg-black md:h-[780px]">
       <div className="absolute inset-0 grid grid-cols-3 gap-3 px-3 opacity-90 md:grid-cols-5">
@@ -454,6 +459,39 @@ function Social() {
             <Link to="/report?type=photo_removal" className="underline">{t("Request removal")}</Link>
           </p>
         </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ team */
+
+function TeamTeaser() {
+  const t = useT();
+  const { data } = useApi<{ team: TeamMember[] }>("/api/team");
+  const people = data?.team.slice(0, 10) ?? [];
+  if (!people.length) return null;
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+      <Reveal className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="font-hand text-2xl text-brand">{t("The people who say hi first.")}</p>
+          <h2 className="font-display text-4xl font-extrabold tracking-[-0.03em] sm:text-6xl">{t("Meet the team")}</h2>
+        </div>
+        <Link to="/team" className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 font-semibold text-white hover:bg-brand">
+          {t("Everyone behind IMC")} <ArrowUpRight className="h-4 w-4" />
+        </Link>
+      </Reveal>
+      <div className="scrollbar-none -mx-4 mt-8 flex snap-x gap-4 overflow-x-auto px-4 pb-2">
+        {people.map((m) => (
+          <figure key={m.id} className="w-40 shrink-0 snap-start sm:w-44">
+            <img src={imageUrl(m.photo)} alt={m.name} loading="lazy" className="aspect-square w-full rounded-3xl object-cover shadow-md" />
+            <figcaption className="mt-2">
+              <span className="block font-semibold leading-tight">{m.name}</span>
+              <span className="text-xs text-muted">{m.role}</span>
+            </figcaption>
+          </figure>
+        ))}
       </div>
     </section>
   );
