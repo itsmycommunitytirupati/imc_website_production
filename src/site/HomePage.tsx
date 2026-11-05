@@ -8,6 +8,7 @@ import { IMC_PHOTOS } from "../content/photos";
 import { EmptyState, ErrorState, EventCard, GroupLogo, LoadingCards, OpportunityCard, SampleBadge, SectionTitle, StoryCard } from "./kit";
 import { GopuramIcon, HillsSilhouette } from "./ui";
 import Reveal from "./Reveal";
+import { PosterDeck } from "./PosterDeck";
 
 // The brief's community-first home: what's on, who to meet, and one clear way in.
 // Visitors get their own band near the end and the full guide under Discover.
@@ -106,7 +107,7 @@ function Happening() {
   const today = istToday();
   const wk = weekendRange();
   const query = range === "weekend" ? `from=${wk.from}&to=${wk.to}` : range === "week" ? `from=${today}&to=${addDays(today, 7)}` : "";
-  const { data, loading, error, reload } = useApi<{ events: EventItem[] }>(`/api/events?limit=6&${query}`);
+  const { data, loading, error, reload } = useApi<{ events: EventItem[] }>(`/api/events?limit=7&${query}`);
   const tabs: [Range, string][] = [["all", "Coming up"], ["weekend", "This weekend"], ["week", "Next 7 days"]];
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
@@ -134,13 +135,7 @@ function Happening() {
         ) : !data?.events.length ? (
           <EmptyState action={<Link to="/opportunities#propose" className="font-semibold text-brand underline">{t("Propose an event")}</Link>} />
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {data.events.slice(0, 6).map((e, i) => (
-              <div key={e.slug} className={i >= 3 ? "hidden lg:block" : ""}>
-                <EventCard e={e} />
-              </div>
-            ))}
-          </div>
+          <PosterDeck events={data.events.slice(0, 7)} />
         )}
       </div>
     </section>

@@ -9,6 +9,7 @@ import { formatWhen, imageUrl, priceLabel, useApi, type EventItem, type GalleryP
 import { ErrorState, GroupCard, LoadingCards, SampleBadge } from "./kit";
 import { GopuramIcon, Logo } from "./ui";
 import Reveal from "./Reveal";
+import { EventTicket } from "./PosterDeck";
 import { useT } from "../lib/i18n";
 
 // The communities hub: IMC's official circles with real hosts and next meetups, upcoming events
@@ -219,36 +220,6 @@ function Tribes() {
 
 /* ---------------------------------------------------------- experiences */
 
-function Poster({ e, className = "", style }: { e: EventItem; className?: string; style?: CSSProperties }) {
-  const t = useT();
-  const p = POSTER_STYLES[e.category] ?? POSTER_STYLES.meetups;
-  return (
-    <Link to={`/events/${e.slug}`} style={style} className={`group/poster relative block overflow-hidden rounded-2xl text-left shadow-2xl ring-1 ring-black/10 ${className}`}>
-      <img src={imageUrl(e.image)} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
-      <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${p.bg} 42%, ${p.bg}cc 58%, transparent 85%)` }} />
-      <div className="relative flex h-full flex-col p-4" style={{ color: p.fg }}>
-        <div className="flex items-start justify-between">
-          <span className="rounded-md bg-white px-2 py-1 text-center text-[10px] font-bold uppercase leading-tight text-ink shadow">
-            {formatWhen(e.start_at, { weekday: "short" })}
-            <span className="block font-display text-xl leading-none">{formatWhen(e.start_at, { day: "numeric" })}</span>
-            {formatWhen(e.start_at, { month: "short" })}
-          </span>
-          {e.is_sample === 1 ? <SampleBadge /> : <span className="rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-bold tracking-wider text-white">IMC</span>}
-        </div>
-        <div className="mt-auto">
-          <p className="text-3xl">{p.emoji}</p>
-          <p className="mt-1 font-display text-2xl font-extrabold uppercase leading-[0.95] tracking-tight">{e.title}</p>
-          <p className="mt-2 text-xs opacity-80">{e.venue}</p>
-          <div className="mt-3 flex items-center justify-between">
-            <span className="rounded-full px-2.5 py-1 text-xs font-bold" style={{ background: p.accent, color: p.bg }}>{t(priceLabel(e))}</span>
-            <span className="text-xs font-semibold underline-offset-4 group-hover/poster:underline">{e.seats_left === 0 ? t("Sold out") : `${t("I'm in")} →`}</span>
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
 function ExperiencesFan() {
   const t = useT();
   const { data } = useUpcoming();
@@ -288,14 +259,14 @@ function ExperiencesFan() {
               >
                 {/* Lift and straighten on hover without touching the fan position. */}
                 <div className="transition duration-300 group-hover/fan:[transform:translateY(-28px)_rotate(var(--straighten))_scale(1.04)]">
-                  <Poster e={e} className="h-[330px] w-[230px]" />
+                  <EventTicket e={e} notch="bg-white" className="h-[330px] w-[230px]" />
                 </div>
               </div>
             );
           })}
         </div>
         <div className="scrollbar-none -mx-4 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 lg:hidden">
-          {fan.map((e) => <Poster key={e.slug} e={e} className="h-[360px] w-[72%] shrink-0 snap-center sm:w-[260px]" />)}
+          {fan.map((e) => <EventTicket key={e.slug} e={e} notch="bg-white" className="h-[360px] w-[72%] shrink-0 snap-center sm:w-[260px]" />)}
         </div>
       </div>
     </section>

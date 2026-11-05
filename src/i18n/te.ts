@@ -902,5 +902,9 @@ const dict: Record<string, string> = {
   "available": "అందుబాటులో",
   "is cancelled": "రద్దైంది",
   "with PhonePe": "PhonePe తో",
+  "Next event": "తదుపరి ఈవెంట్",
+  "Previous event": "మునుపటి ఈవెంట్",
+  "Swipe or drag the cards. Tap one to bring it forward.": "కార్డులను స్వైప్ లేదా డ్రాగ్ చేయండి. ముందుకు తేవడానికి ఒకదాన్ని నొక్కండి.",
+  "Upcoming events": "రాబోయే ఈవెంట్స్",
 };
 export default dict;

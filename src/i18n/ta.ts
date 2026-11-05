@@ -902,5 +902,9 @@ const dict: Record<string, string> = {
   "available": "கிடைக்கிறது",
   "is cancelled": "ரத்து செய்யப்பட்டது",
   "with PhonePe": "PhonePe மூலம்",
+  "Next event": "அடுத்த நிகழ்வு",
+  "Previous event": "முந்தைய நிகழ்வு",
+  "Swipe or drag the cards. Tap one to bring it forward.": "அட்டைகளை ஸ்வைப் அல்லது இழுக்கவும். முன்னே கொண்டுவர ஒன்றைத் தட்டவும்.",
+  "Upcoming events": "வரவிருக்கும் நிகழ்வுகள்",
 };
 export default dict;

@@ -20,7 +20,7 @@ Site routes (switch in `App.tsx`; dynamic segments are split by hand):
 
 | Route | Page | Notes |
 |---|---|---|
-| `/` | `site/HomePage.tsx` | Brief homepage: hero (Explore Events / Find Your People), What's happening, Find your people, Adda, Stories, Opportunities, Join band, "Visiting Tirupati?" band |
+| `/` | `site/HomePage.tsx` | Brief homepage: hero (Explore Events / Find Your People), What's happening (the poster deck), Find your people, Adda, Stories, Opportunities, Join band, "Visiting Tirupati?" band |
 | `/discover` | `site/DiscoverPage.tsx` | The old visitor-first home (mock-up): Ask guide search, trip types, chat preview, seven hills |
 | `/visitor-guide` | `VisitorGuidePage.tsx` | Anchors `#tirumala`, `#getting-around`, `#food-stays`, `#things-to-do` |
 | `/events`, `/events/:slug` | `EventsPage.tsx`, `EventPage.tsx` | Filters in the URL (`when`, `date`, `category`, `price`, `area`, `beginner`); RSVP form, add-to-calendar |
@@ -265,7 +265,14 @@ P2 signature features). Update its checklist statuses as work lands. Non-negotia
   labelled as an illustration, "Create the scene" cards, a stories teaser with a removal link,
   testimonials, FAQs and a saffron "See you this Sunday?" close. Telugu touches ("రండి! Randi") are
   welcome. Visitor pages stay calm and practical.
-- The home page's example conversation is `site/ChatPreview.tsx`: a chat window that plays the
+- Event posters are IMC "tickets" (`EventTicket` in `site/PosterDeck.tsx`): photo, title, a
+  perforated tear-off stub with date and price, and a rubber-stamp "Sold out"/"Cancelled". The
+  home page's What's happening is `PosterDeck`: tickets are dealt out from a stack when the section
+  scrolls into view, then swipe/drag/tap or arrows bring one forward (the front ticket opens its
+  event), with a gentle auto-advance that pauses on hover/focus and is off for reduced motion.
+  Communities reuses the tickets in its fanned row. Keep this IMC's own design; don't copy
+  communitie.in's poster styling.
+- The discover page's example conversation is `site/ChatPreview.tsx`: a chat window that plays the
   exchange on scroll, and whose input opens the real guide.
 - Shared building blocks in `site/ui.tsx`: `LanguageMenu`, `HillsSilhouette` (seven-ridge
   signature used in heroes and the footer), `PageHero` (photo header for inner pages), the

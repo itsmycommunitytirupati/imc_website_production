@@ -902,5 +902,9 @@ const dict: Record<string, string> = {
   "available": "उपलब्ध",
   "is cancelled": "रद्द हो गया",
   "with PhonePe": "PhonePe से",
+  "Next event": "अगला इवेंट",
+  "Previous event": "पिछला इवेंट",
+  "Swipe or drag the cards. Tap one to bring it forward.": "कार्ड स्वाइप या ड्रैग करें। आगे लाने के लिए किसी एक पर टैप करें।",
+  "Upcoming events": "आने वाले इवेंट",
 };
 export default dict;
