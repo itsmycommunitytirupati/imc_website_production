@@ -33,6 +33,8 @@ Site routes (switch in `App.tsx`; dynamic segments are split by hand):
 | `/gallery` | `GalleryPage.tsx` | Photos from the admin (consented only), community filter, lightbox with removal link |
 | `/team` | `TeamPage.tsx` | Core team, captains, hosts, volunteers from the admin |
 | `/saved` | `SavedPage.tsx` | Bookmarked events (device only) |
+| `/bookings`, `/bookings/choose` | `PaymentPages.tsx` | Email-code sign-in, bookings and IMC credit; one-tap credit-or-refund after a cancellation |
+| `/pay/return`, `/pay/mock` | `PaymentPages.tsx` | After PhonePe: polls the server's status check; mock checkout for local testing only |
 | `/privacy`, `/terms` | old `LegalPage` | |
 
 `/experiences` and `/community` redirect to `/events` and `/communities` (`?c=` becomes
@@ -98,7 +100,8 @@ the page falls back to the curated answers in `content/guide.ts`.
 
 - **Database:** D1 `imc-community` (binding `DB`, id in `wrangler.jsonc`). Schema and seed in
   `migrations/` (0001 schema, 0002 sample seed, 0003 official community names, 0004 interest ids,
-  0005 gallery + team seeded with IMC's existing 31 photos and 19 team members).
+  0005 gallery + team seeded with IMC's existing 31 photos and 19 team members, 0006 payments,
+  credit ledger, refunds, login codes and sessions).
   Apply with `npx wrangler d1 migrations apply imc-community --local` (dev) or `--remote` (live).
   Add new migrations as numbered files; never edit applied ones.
 - **Public API (`worker/community.ts`):** `GET /api/events|groups|adda|opportunities|stories|stats|config`,
@@ -120,6 +123,27 @@ the page falls back to the curated answers in `content/guide.ts`.
 - **Gallery and team:** `GET /api/gallery?group=` (published and consent-confirmed only) and
   `GET /api/team`. The admin's Gallery tab bulk-uploads with a consent checkbox; photos without
   consent stay hidden. The Communities photo wall and team strip, group pages and `/gallery` read them.
+- **Payments (PhonePe Standard Checkout V2; `worker/phonepe.ts`, `worker/payments.ts`, migration 0006):**
+  paid events show `site/PayForm.tsx` when `/api/config` says `payments: true`; otherwise they keep
+  the free RSVP form ("pay at venue"). Flow: `POST /api/pay/start` holds the seats for 15 minutes
+  (a `payments` row; seat counts include unexpired holds via `seatsTakenSql`), spends IMC credit if
+  the signed-in owner of that email asks, then sends the person to PhonePe. A booking is confirmed
+  only by `reconcile()`, which asks PhonePe's **Order Status API**; the return page
+  (`/pay/return`), the webhook (`POST /api/pay/webhook`, Authorization = SHA256 of
+  "username:password") and the 5-minute cron all just trigger that check. Failed or expired
+  payments free the seats and return any credit. Cancelling a paid booking (admin Payments tab, or
+  the payer's one-tap email link after admin "Notify payers" on a cancelled event) gives IMC credit
+  (`credit_ledger`, closed: IMC events only, no cash-out) or a PhonePe refund of the gateway part.
+  Vars: `PHONEPE_ENV` (`production`/`sandbox`; empty = off), `PHONEPE_CLIENT_ID`,
+  `PHONEPE_CLIENT_VERSION`, `PHONEPE_WEBHOOK_USERNAME`; secrets `PHONEPE_CLIENT_SECRET`,
+  `PHONEPE_WEBHOOK_PASSWORD` (set by the user with `npx wrangler secret put`). Never leave
+  `sandbox` on for the public site. `mock` works only with `ADMIN_DEV_BYPASS=1` (local), via
+  `/pay/mock`.
+- **Email and "My bookings" (`worker/email.ts`, `worker/auth.ts`):** Resend API (`RESEND_API_KEY`
+  secret, `EMAIL_FROM` var on a verified domain) sends receipts, cancellation choices and 6-digit
+  sign-in codes. `/bookings` signs in by code (HttpOnly session cookie, hashes only in D1) and shows
+  bookings and IMC credit. `SITE_URL` is the public address used in emails. Locally,
+  `EMAIL_DEV_ECHO=1` prints emails to the wrangler log and shows the code on screen.
 - **Share previews (`worker/meta.ts`):** `/events/*`, `/communities/*`, `/stories/*` run the Worker
   first (`run_worker_first`) to rewrite title/description/og tags from D1.
 - **Sample content:** every seeded row has `is_sample = 1` and shows a **Sample** badge. IMC

@@ -19,6 +19,21 @@ export interface Env {
   TURNSTILE_SITE_KEY?: string;
   /** Local dev only (.dev.vars): skip the Access sign-in for the admin API. */
   ADMIN_DEV_BYPASS?: string;
+  /** PhonePe PG: "production" | "sandbox" | "mock" (mock only with ADMIN_DEV_BYPASS). Client id/version are vars; the secret is a Worker secret. */
+  PHONEPE_ENV?: string;
+  PHONEPE_CLIENT_ID?: string;
+  PHONEPE_CLIENT_VERSION?: string;
+  PHONEPE_CLIENT_SECRET?: string;
+  /** Webhook Basic credentials configured in the PhonePe dashboard (password is a secret). */
+  PHONEPE_WEBHOOK_USERNAME?: string;
+  PHONEPE_WEBHOOK_PASSWORD?: string;
+  /** Email (Resend): API key secret and sender, e.g. "IMC Tirupati <hello@imctirupati.com>". */
+  RESEND_API_KEY?: string;
+  EMAIL_FROM?: string;
+  /** Local dev only: log emails (and return login codes) instead of sending. */
+  EMAIL_DEV_ECHO?: string;
+  /** Public site address used in emails (links must not point at the admin host). */
+  SITE_URL?: string;
   TURNSTILE_SECRET?: string;
 }
 

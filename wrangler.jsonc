@@ -28,8 +28,22 @@
     // Fill both after creating the Access application (see CLAUDE.md); admin writes stay off until then.
     "ACCESS_TEAM_DOMAIN": "bold-cherry-7506.cloudflareaccess.com",
     "ACCESS_AUD": "5193a122c2ae170f3bea54075bdd1aede3c4374f63f24cc372b7f2abf93a2e3e",
+    // PhonePe: "production" or "sandbox" once PHONEPE_CLIENT_ID is filled and the secret is set
+    // (npx wrangler secret put PHONEPE_CLIENT_SECRET). Empty = paid events take RSVPs, pay at venue.
+    // Sandbox accepts test payments, so never leave it on "sandbox" for the public site.
+    "PHONEPE_ENV": "",
+    "PHONEPE_CLIENT_ID": "",
+    "PHONEPE_CLIENT_VERSION": "1",
+    // Webhook Basic credentials set in PhonePe's dashboard; the password is a secret (PHONEPE_WEBHOOK_PASSWORD).
+    "PHONEPE_WEBHOOK_USERNAME": "",
+    // Email via Resend (secret RESEND_API_KEY); the sender must be on a domain verified in Resend.
+    "EMAIL_FROM": "",
+    // Public address for links in emails. Change to https://imctirupati.com at the domain move.
+    "SITE_URL": "https://imc-website-production.itsmycommunity-tirupati.workers.dev",
     // Turnstile site key (public). The secret goes in a Worker secret: TURNSTILE_SECRET.
     "TURNSTILE_SITE_KEY": ""
   },
+  // Settles payments whose PhonePe webhook or return visit never arrived (worker/payments.ts).
+  "triggers": { "crons": ["*/5 * * * *"] },
   "observability": { "enabled": true }
 }

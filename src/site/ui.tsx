@@ -185,7 +185,7 @@ export function Header() {
 function MobileMenu({ path }: { path: string }) {
   const t = useT();
   const [lang] = useLang();
-  const items = [{ to: "/", label: "Home" }, ...NAV, { to: "/gallery", label: "Gallery" }, { to: "/adda", label: "Tirupati Adda" }, { to: "/team", label: "Our team" }, { to: "/join", label: "Join IMC" }, { to: "/saved", label: "Saved" }];
+  const items = [{ to: "/", label: "Home" }, ...NAV, { to: "/gallery", label: "Gallery" }, { to: "/adda", label: "Tirupati Adda" }, { to: "/team", label: "Our team" }, { to: "/bookings", label: "My bookings" }, { to: "/join", label: "Join IMC" }, { to: "/saved", label: "Saved" }];
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -256,6 +256,7 @@ export function Footer() {
             <Link to="/stories">{t("Stories")}</Link>
             <Link to="/gallery">{t("Gallery")}</Link>
             <Link to="/team">{t("Our team")}</Link>
+            <Link to="/bookings">{t("My bookings")}</Link>
             <Link to="/join">{t("Join IMC")}</Link>
           </FooterCol>
           <FooterCol title={t("Visit")}>

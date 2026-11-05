@@ -140,7 +140,21 @@ export function Honeypot({ value, onChange }: { value: string; onChange: (v: str
   );
 }
 
-let configPromise: Promise<{ turnstileSiteKey: string }> | null = null;
+interface SiteConfig {
+  turnstileSiteKey: string;
+  payments: boolean;
+}
+let configPromise: Promise<SiteConfig> | null = null;
+const loadConfig = () => (configPromise ??= api<SiteConfig>("/api/config").catch(() => ({ turnstileSiteKey: "", payments: false })));
+
+/** Public settings from the Worker (Turnstile key, whether online payment is switched on). */
+export function useSiteConfig() {
+  const [config, setConfig] = useState<SiteConfig | null>(null);
+  useEffect(() => {
+    loadConfig().then(setConfig);
+  }, []);
+  return config;
+}
 declare global {
   interface Window {
     turnstile?: { render: (el: HTMLElement, opts: Record<string, unknown>) => string; remove: (id: string) => void };
@@ -152,8 +166,7 @@ export function HumanCheck({ onToken }: { onToken: (token: string) => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const [siteKey, setSiteKey] = useState("");
   useEffect(() => {
-    configPromise ??= api<{ turnstileSiteKey: string }>("/api/config").catch(() => ({ turnstileSiteKey: "" }));
-    configPromise.then((c) => setSiteKey(c.turnstileSiteKey));
+    loadConfig().then((c) => setSiteKey(c.turnstileSiteKey));
   }, []);
   useEffect(() => {
     if (!siteKey || !ref.current) return;

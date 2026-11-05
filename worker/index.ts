@@ -9,6 +9,8 @@ import { handleCommunity } from "./community";
 import { handleAdmin } from "./admin";
 import { withShareMeta } from "./meta";
 import { serveMedia } from "./media";
+import { handlePayments, reconcileAll } from "./payments";
+import { handleAuth } from "./auth";
 
 const LANGS = new Set(["en", "te", "ta", "hi"]);
 const CACHE_SECONDS = 6 * 60 * 60;
@@ -86,6 +88,8 @@ export default {
     if (pathname === "/api/health") return json({ ok: true, model: env.GUIDE_MODEL || DEFAULT_MODEL, search: env.TAVILY_API_KEY ? "tavily" : "wikipedia" });
     try {
       if (pathname.startsWith("/api/admin/")) return await handleAdmin(request, env, pathname);
+      if (pathname.startsWith("/api/auth/")) return (await handleAuth(request, env, pathname)) ?? json({ error: "not_found" }, 404);
+      if (pathname.startsWith("/api/pay/") || pathname === "/api/me") return (await handlePayments(request, env, pathname)) ?? json({ error: "not_found" }, 404);
       if (pathname.startsWith("/api/")) return (await handleCommunity(request, env, pathname)) ?? json({ error: "not_found" }, 404);
     } catch (err) {
       console.error("api error", pathname, err instanceof Error ? err.message : err);
@@ -95,5 +99,10 @@ export default {
     const share = pathname.match(/^\/(events|communities|stories)\/([a-z0-9-]+)\/?$/);
     if (share) return withShareMeta(request, env, share[1], share[2]);
     return env.ASSETS.fetch(request);
+  },
+
+  // Every 5 minutes: settle payments whose webhook or return visit never arrived, check refunds.
+  async scheduled(_event: unknown, env: Env, ctx: ExecutionContext) {
+    ctx.waitUntil(reconcileAll(env).catch((err) => console.error("reconcile failed", err instanceof Error ? err.message : err)));
   },
 };

@@ -96,3 +96,12 @@ export function parseList(v: unknown): string[] {
   }
   return [];
 }
+
+/**
+ * Seats taken for an event: confirmed RSVPs plus unexpired payment holds (a checkout in progress
+ * keeps its seats for 15 minutes). `eventId` is an SQL expression such as "e.id" or "?".
+ */
+export function seatsTakenSql(eventId: string) {
+  return `((SELECT COALESCE(SUM(party_size), 0) FROM rsvps WHERE event_id = ${eventId} AND status = 'confirmed')
+    + (SELECT COALESCE(SUM(party_size), 0) FROM payments WHERE event_id = ${eventId} AND state IN ('created', 'pending') AND expires_at > datetime('now')))`;
+}

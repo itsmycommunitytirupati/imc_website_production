@@ -14,6 +14,8 @@ export type AnalyticsEvent =
   | "view_event_detail"
   | "start_registration"
   | "registration_complete"
+  | "start_payment"
+  | "payment_complete"
   | "join_group"
   | "select_interests"
   | "submit_idea"

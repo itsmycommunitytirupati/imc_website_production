@@ -4,6 +4,7 @@
 import type { Env } from "./env";
 import { int, json, readJson, slugify, str } from "./http";
 import { MAX_UPLOAD, storeMedia } from "./media";
+import { notifyPayers, reconcile, resolvePayment } from "./payments";
 
 // ------------------------------------------------------------------ auth
 
@@ -222,6 +223,39 @@ export async function handleAdmin(request: Request, env: Env, path: string): Pro
     const key = await storeMedia(env, await request.arrayBuffer(), type);
     if (!key) return json({ error: "bad_image" }, 422);
     return json({ ok: true, image: `media:${key}`, url: `/media/${key}` });
+  }
+
+  // Payments: list, re-check with PhonePe, cancel a booking as credit or refund.
+  if (seg[2] === "payments") {
+    if (method === "GET" && !seg[3]) {
+      const { results } = await env.DB.prepare(
+        `SELECT p.id, p.ref, p.merchant_order_id, p.name, p.email, p.phone, p.party_size, p.total_paise, p.credit_paise, p.gateway_paise,
+                p.state, p.resolution, p.payment_mode, p.transaction_id, p.claim_sent_at, p.created_at, e.title AS event_title, e.start_at,
+                (SELECT state FROM refunds r WHERE r.payment_id = p.id ORDER BY r.id DESC LIMIT 1) AS refund_state
+         FROM payments p JOIN events e ON e.id = p.event_id ORDER BY p.id DESC LIMIT 500`,
+      ).all();
+      return json({ rows: results });
+    }
+    const pid = int(seg[3], 0);
+    if (method === "POST" && pid && seg[4] === "check") {
+      const p = await env.DB.prepare("SELECT * FROM payments WHERE id = ?").bind(pid).first();
+      if (!p) return json({ error: "not_found" }, 404);
+      return json({ ok: true, state: await reconcile(env, p as never) });
+    }
+    if (method === "POST" && pid && seg[4] === "resolve") {
+      const body = (await readJson(request)) ?? {};
+      const to = body.to === "refund" ? "refund" : body.to === "credit" ? "credit" : null;
+      if (!to) return json({ error: "bad_request" }, 400);
+      const res = await resolvePayment(env, pid, to, auth.email);
+      return "error" in res ? json(res, 409) : json(res);
+    }
+    return json({ error: "not_found" }, 404);
+  }
+  if (method === "POST" && seg[2] === "events" && seg[4] === "notify-payers") {
+    const ev = await env.DB.prepare("SELECT status FROM events WHERE id = ?").bind(int(seg[3], 0)).first<{ status: string }>();
+    if (!ev) return json({ error: "not_found" }, 404);
+    if (ev.status !== "cancelled") return json({ error: "not_cancelled" }, 409);
+    return json({ ok: true, ...(await notifyPayers(env, int(seg[3], 0))) });
   }
 
   const table = seg[2];

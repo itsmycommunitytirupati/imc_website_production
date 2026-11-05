@@ -1,11 +1,12 @@
 // Public community API: events + RSVP, groups + join, Adda, opportunities, stories, submissions.
 import type { Env } from "./env";
 import { rateLimited } from "./guardrails";
-import { checkPerson, humanCheck, int, invalid, json, nowLocal, parseList, randomRef, readJson, sha256, str, today, type Fields } from "./http";
+import { checkPerson, humanCheck, int, invalid, json, nowLocal, parseList, randomRef, readJson, seatsTakenSql, sha256, str, today, type Fields } from "./http";
+import { gatewayMode } from "./phonepe";
 
 const EVENT_COLS = `e.id, e.slug, e.title, e.category, e.summary, e.start_at, e.end_at, e.venue, e.area, e.price_inr, e.price_note,
   e.capacity, e.organizer_name, e.image, e.beginner_friendly, e.status, e.is_sample, g.slug AS group_slug, g.name AS group_name,
-  (SELECT COALESCE(SUM(party_size), 0) FROM rsvps r WHERE r.event_id = e.id AND r.status = 'confirmed') AS booked`;
+  ${seatsTakenSql("e.id")} AS booked`;
 
 type Row = Record<string, unknown>;
 
@@ -23,7 +24,7 @@ export async function handleCommunity(request: Request, env: Env, path: string):
   const seg = path.split("/").filter(Boolean); // ["api", "events", "slug"]
 
   if (method === "GET" && path === "/api/config") {
-    return json({ turnstileSiteKey: env.TURNSTILE_SITE_KEY || "", humanCheck: Boolean(env.TURNSTILE_SECRET) });
+    return json({ turnstileSiteKey: env.TURNSTILE_SITE_KEY || "", humanCheck: Boolean(env.TURNSTILE_SECRET), payments: Boolean(gatewayMode(env)) });
   }
 
   if (method === "GET" && path === "/api/stats") {
@@ -127,11 +128,11 @@ export async function handleCommunity(request: Request, env: Env, path: string):
     // Capacity is enforced inside one statement, so two people can't take the last seat.
     const res = await env.DB.prepare(
       `INSERT INTO rsvps (event_id, ref, name, contact, party_size, note, status)
-       SELECT ?, ?, ?, ?, ?, ?, 'confirmed'
-       WHERE (SELECT capacity FROM events WHERE id = ?) = 0
-          OR (SELECT COALESCE(SUM(party_size), 0) FROM rsvps WHERE event_id = ? AND status = 'confirmed') + ? <= (SELECT capacity FROM events WHERE id = ?)`,
+       SELECT ?1, ?3, ?4, ?5, ?2, ?6, 'confirmed'
+       WHERE (SELECT capacity FROM events WHERE id = ?1) = 0
+          OR ${seatsTakenSql("?1")} + ?2 <= (SELECT capacity FROM events WHERE id = ?1)`,
     )
-      .bind(event.id, ref, name, contact, party, str(body.note, 300), event.id, event.id, party, event.id)
+      .bind(event.id, party, ref, name, contact, str(body.note, 300))
       .run();
     if (res.meta.changes === 1) return json({ ok: true, ref, status: "confirmed", party_size: party });
 

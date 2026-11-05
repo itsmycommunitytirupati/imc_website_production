@@ -5,7 +5,8 @@ import { usePageTitle } from "../lib/site";
 import { useT } from "../lib/i18n";
 import { eventDate, formatTime, formatWhen, imageUrl, post, priceLabel, useApi, type EventItem } from "../lib/api";
 import { track } from "../lib/analytics";
-import { Availability, ErrorState, NotFound, EventCard, Honeypot, HumanCheck, SampleBadge, ShareButton, SoloNoMore, SubmitButton, TextArea, TextInput, useForm } from "./kit";
+import { Availability, ErrorState, NotFound, EventCard, Honeypot, HumanCheck, SampleBadge, ShareButton, SoloNoMore, SubmitButton, TextArea, TextInput, useForm, useSiteConfig } from "./kit";
+import PayForm from "./PayForm";
 
 interface RsvpResult {
   ok: true;
@@ -19,6 +20,7 @@ export default function EventPage({ slug }: { slug: string }) {
   const t = useT();
   const { data, loading, error, reload } = useApi<{ event: EventItem; related: EventItem[] }>(`/api/events/${slug}`);
   const e = data?.event;
+  const config = useSiteConfig();
   usePageTitle(e ? `${e.title} | IMC Tirupati` : "Event | IMC Tirupati", e?.summary);
   useEffect(() => {
     if (e) track("view_event_detail", { event: e.slug, category: e.category, sample: e.is_sample === 1 });
@@ -107,6 +109,8 @@ export default function EventPage({ slug }: { slug: string }) {
             <Closed icon={<XCircle className="h-8 w-8 text-red-600" />} title={t("This event is cancelled")} text={t("Sorry about that. Here are other things happening soon.")} cta={t("See other events")} />
           ) : past ? (
             <Closed icon={<Hourglass className="h-8 w-8 text-muted" />} title={t("This event has ended")} text={t("RSVPs are closed. Catch the next one.")} cta={t("See upcoming events")} />
+          ) : config?.payments && e.price_inr > 0 && e.seats_left !== 0 ? (
+            <PayForm e={e} />
           ) : (
             <RsvpForm e={e} />
           )}

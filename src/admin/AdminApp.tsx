@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import {
   BarChart3, CalendarDays, Check, Download, ExternalLink, FileText, Flag, Images, Inbox, LayoutDashboard, Lock, Megaphone,
-  MessagesSquare, Pencil, Plus, RefreshCw, Ticket, Upload, UserPlus, UserRound, Users, X,
+  IndianRupee, MessagesSquare, Pencil, Plus, RefreshCw, Ticket, Upload, UserPlus, UserRound, Users, X,
 } from "lucide-react";
 import { usePageTitle } from "../lib/site";
 import { ApiError, api, formatTime, formatWhen, imageUrl, uploadImage, useApi } from "../lib/api";
@@ -12,12 +12,13 @@ import { Logo } from "../site/ui";
 // Nothing is deleted from here: unpublish, cancel or change a status instead.
 
 type Row = Record<string, unknown> & { id: number };
-type Tab = "overview" | "events" | "rsvps" | "gallery" | "team" | "groups" | "members" | "adda_posts" | "opportunities" | "stories" | "submissions" | "stats";
+type Tab = "overview" | "events" | "rsvps" | "payments" | "gallery" | "team" | "groups" | "members" | "adda_posts" | "opportunities" | "stories" | "submissions" | "stats";
 
 const TABS: { id: Tab; label: string; Icon: typeof LayoutDashboard; badge?: keyof Overview }[] = [
   { id: "overview", label: "Overview", Icon: LayoutDashboard },
   { id: "events", label: "Events", Icon: CalendarDays },
   { id: "rsvps", label: "RSVPs", Icon: Ticket },
+  { id: "payments", label: "Payments", Icon: IndianRupee },
   { id: "gallery", label: "Gallery", Icon: Images },
   { id: "team", label: "Team", Icon: UserRound },
   { id: "groups", label: "Communities", Icon: Users },
@@ -78,6 +79,7 @@ export default function AdminApp() {
         {tab === "overview" && <OverviewTab data={overview.data} go={setTab} />}
         {tab === "events" && <Resource key="events" config={EVENTS} onChange={overview.reload} />}
         {tab === "rsvps" && <RsvpsTab />}
+        {tab === "payments" && <PaymentsTab />}
         {tab === "gallery" && <Resource key="gallery" config={GALLERY} />}
         {tab === "team" && <Resource key="team" config={TEAM} />}
         {tab === "groups" && <Resource key="groups" config={GROUPS} />}
@@ -568,7 +570,24 @@ const EVENTS: ResourceConfig = {
     { label: "Status", render: (r) => <><Pill tone={toneFor(String(r.status))}>{String(r.status)}</Pill> {!yes(r.published) && <Pill>hidden</Pill>}</> },
   ],
   link: (r) => `/events/${r.slug}`,
-  quick: (r, save) => (r.status === "scheduled" ? <QuickButton onClick={() => confirm(`Cancel "${r.title}"? People who RSVP'd will see it as cancelled.`) && save({ status: "cancelled" })}>Cancel</QuickButton> : null),
+  quick: (r, save) =>
+    r.status === "scheduled" ? (
+      <QuickButton onClick={() => confirm(`Cancel "${r.title}"? People who RSVP'd will see it as cancelled. Then use "Notify payers" so anyone who paid can choose credit or a refund.`) && save({ status: "cancelled" })}>Cancel</QuickButton>
+    ) : r.status === "cancelled" && Number(r.price_inr) > 0 ? (
+      <QuickButton
+        onClick={async () => {
+          if (!confirm("Email everyone who paid for this event a one-tap choice: IMC credit or a refund?")) return;
+          try {
+            const res = await api<{ payers: number; sent: number }>(`/api/admin/events/${r.id}/notify-payers`, { method: "POST", body: "{}" });
+            alert(`${res.sent} of ${res.payers} payers emailed.`);
+          } catch (e) {
+            alert(`Couldn't notify payers (${(e as ApiError).code}).`);
+          }
+        }}
+      >
+        Notify payers
+      </QuickButton>
+    ) : null,
   fields: [
     { key: "title", label: "Title", wide: true },
     { key: "group_id", label: "Community", type: "group" },
@@ -928,6 +947,86 @@ function RsvpsTab() {
                     <div className="flex justify-end gap-2">
                       {r.status === "waitlist" && <QuickButton onClick={() => setStatus(r, "confirmed")}>Confirm</QuickButton>}
                       {r.status !== "cancelled" && <QuickButton onClick={() => setStatus(r, "cancelled")}>Cancel</QuickButton>}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </>
+  );
+}
+
+/* ------------------------------------------------------------------ payments */
+
+const paise = (v: unknown) => `₹${(Number(v ?? 0) / 100).toLocaleString("en-IN")}`;
+
+function PaymentsTab() {
+  const { data, loading, error, reload } = useApi<{ rows: Row[] }>("/api/admin/payments");
+  const [filter, setFilter] = useState("paid");
+  const [busy, setBusy] = useState(0);
+  const rows = (data?.rows ?? []).filter((r) => (filter === "all" ? true : filter === "paid" ? r.state === "completed" : filter === "open" ? r.state === "created" || r.state === "pending" : r.state === "failed" || r.state === "expired"));
+  const act = async (r: Row, action: "check" | "credit" | "refund") => {
+    const question =
+      action === "credit"
+        ? `Cancel ${r.ref} and add ${paise(r.total_paise)} IMC credit for ${r.email}?`
+        : `Cancel ${r.ref} and refund ${paise(r.gateway_paise)} to the account they paid from?${Number(r.credit_paise) ? ` (${paise(r.credit_paise)} paid with credit goes back as credit.)` : ""}`;
+    if (action !== "check" && !confirm(question)) return;
+    setBusy(r.id);
+    try {
+      await api(`/api/admin/payments/${r.id}/${action === "check" ? "check" : "resolve"}`, { method: "POST", body: JSON.stringify({ to: action }) });
+      reload();
+    } catch (e) {
+      alert(`Couldn't do that (${(e as ApiError).code}).`);
+    } finally {
+      setBusy(0);
+    }
+  };
+  const total = rows.filter((r) => r.state === "completed" && !r.resolution).reduce((n, r) => n + Number(r.gateway_paise), 0);
+  const filters: [string, string][] = [["paid", "Paid"], ["open", "In progress"], ["failed", "Failed or expired"], ["all", "All"]];
+  return (
+    <>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="font-display text-3xl font-extrabold">Payments</h1>
+          <p className="mt-1 max-w-2xl text-muted">Every online payment. A booking is confirmed only after PhonePe confirms. To cancel a paid booking, give IMC credit (instant, no fee lost) or refund to the payer's account.</p>
+        </div>
+        <button onClick={() => downloadCsv("payments", rows)} className="inline-flex items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-sm font-semibold"><Download className="h-4 w-4" /> CSV</button>
+      </div>
+      <div className="mt-5 flex flex-wrap items-center gap-2">
+        {filters.map(([id, label]) => (
+          <button key={id} onClick={() => setFilter(id)} className={`rounded-full px-3 py-1.5 text-sm font-medium ${filter === id ? "bg-ink text-white" : "bg-white ring-1 ring-line"}`}>{label}</button>
+        ))}
+        {filter === "paid" && <span className="ml-2 text-sm text-muted">{paise(total)} received through PhonePe (not refunded)</span>}
+      </div>
+      <div className="mt-5 overflow-x-auto rounded-2xl border border-line bg-white">
+        {loading ? <p className="p-6 text-muted">Loading…</p> : error ? <p className="p-6 text-red-700">Couldn't load ({error.code}).</p> : !rows.length ? <p className="p-6 text-muted">Nothing here yet.</p> : (
+          <table className="w-full min-w-[860px] text-sm">
+            <thead className="bg-stone-50 text-left text-muted"><tr>{["Ref", "Person", "Event", "Amount", "Status", "When", ""].map((h) => <th key={h} className="px-4 py-3 font-medium">{h}</th>)}</tr></thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.id} className="border-t border-line align-top">
+                  <td className="px-4 py-3 font-mono text-xs">{String(r.ref)}<span className="block text-muted">{String(r.merchant_order_id)}</span></td>
+                  <td className="px-4 py-3"><span className="font-semibold">{String(r.name)}</span><span className="block text-xs text-muted">{String(r.email)} · {String(r.phone)}</span></td>
+                  <td className="px-4 py-3">{String(r.event_title)}<span className="block text-xs text-muted">{when(r.start_at)} · {String(r.party_size)} {Number(r.party_size) > 1 ? "people" : "person"}</span></td>
+                  <td className="px-4 py-3">{paise(r.total_paise)}{Number(r.credit_paise) > 0 && <span className="block text-xs text-muted">{paise(r.credit_paise)} credit + {paise(r.gateway_paise)} PhonePe</span>}{r.payment_mode ? <span className="block text-xs text-muted">{String(r.payment_mode)}</span> : null}</td>
+                  <td className="px-4 py-3">
+                    <Pill tone={toneFor(r.state === "completed" ? "published" : String(r.state))}>{String(r.state)}</Pill>
+                    {r.resolution ? <span className="mt-1 block"><Pill tone="blue">{r.resolution === "credit" ? "cancelled → credit" : `refund ${String(r.refund_state ?? "pending")}`}</Pill></span> : null}
+                    {r.claim_sent_at && !r.resolution ? <span className="mt-1 block text-xs text-muted">choice emailed</span> : null}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-muted">{created(r.created_at)}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-right">
+                    <div className="flex justify-end gap-2">
+                      {(r.state === "created" || r.state === "pending") && <QuickButton onClick={() => act(r, "check")}>{busy === r.id ? "…" : "Check with PhonePe"}</QuickButton>}
+                      {r.state === "completed" && !r.resolution && (
+                        <>
+                          <QuickButton onClick={() => act(r, "credit")}>{busy === r.id ? "…" : "Cancel → credit"}</QuickButton>
+                          <QuickButton onClick={() => act(r, "refund")}>{busy === r.id ? "…" : "Cancel → refund"}</QuickButton>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>

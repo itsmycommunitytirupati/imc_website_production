@@ -22,7 +22,7 @@ const SKIP_FILES_FOR_LITERALS = new Set(["src/site/Reveal.tsx"]);
 // Also skipped: SVG paths, browser-tab titles and meta descriptions (kept English for search),
 // prefilled WhatsApp messages, menu button labels and the illustrative phone chat.
 const SKIP = /^(IMC|IMC Tirupati|WhatsApp|Instagram|Unsplash|TTD|Photos:|Language: .*|Choose language|Loading|M[\d.]+ .*|.* \| IMC Tirupati.*|IMC Tirupati \|.*|Hi IMC!.*|Partnering with .*|(Open|Close) menu|Open the guide|IMC Tirupati, It's My Community|Easy 5K|Steady 7K|Just coffee after ☕|Ask a local guide about .*|Clubs, meetups and experiences .*|Darshan options, getting around, .*|Find your way, plan your visit and connect with local people in Tirupati\..*|Music evenings, food walks, .*|PRODID:.*)$/;
-const KEEP_KEYS = new Set(["sold_out", "cancelled", "past", "human_check", "title", "text", "tip", "story", "blurb", "price", "recurring", "label", "note", "cta", "q", "a", "heading", "summary", "place", "value", "greeting", "ask", "prompt", "area", "bestFor", "route", "knownFor", "details"]);
+const KEEP_KEYS = new Set(["sold_out", "cancelled", "past", "human_check", "payments_unavailable", "gateway_error", "credit_changed", "email_unavailable", "email_failed","title", "text", "tip", "story", "blurb", "price", "recurring", "label", "note", "cta", "q", "a", "heading", "summary", "place", "value", "greeting", "ask", "prompt", "area", "bestFor", "route", "knownFor", "details"]);
 
 function looksLikeText(s) {
   if (!/[A-Za-z]/.test(s) || s.length < 2) return false;
@@ -56,9 +56,9 @@ export function collectKeys() {
     }
   }
   // Validation messages the Worker returns; forms show them through t().
-  for (const rel of ["worker/http.ts", "worker/community.ts"]) {
+  for (const rel of ["worker/http.ts", "worker/community.ts", "worker/payments.ts", "worker/auth.ts"]) {
     const src = fs.readFileSync(path.join(ROOT, rel), "utf8");
-    for (const m of src.matchAll(/fields\.\w+\s*=\s*"((?:[^"\\]|\\.)*)"|invalid\(\{\s*\w+:\s*"((?:[^"\\]|\\.)*)"/g)) keys.add(JSON.parse(`"${m[1] ?? m[2]}"`));
+    for (const m of src.matchAll(/fields\.\w+\s*=\s*"((?:[^"\\]|\\.)*)"|(?:invalid\(|fields: )\{\s*\w+:\s*"((?:[^"\\]|\\.)*)"/g)) keys.add(JSON.parse(`"${m[1] ?? m[2]}"`));
   }
   return [...keys].sort();
 }

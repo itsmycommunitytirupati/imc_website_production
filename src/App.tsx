@@ -21,6 +21,10 @@ const StoryPage = lazy(() => import("./site/StoryPage"));
 const ReportPage = lazy(() => import("./site/ReportPage"));
 const GalleryPage = lazy(() => import("./site/GalleryPage"));
 const TeamPage = lazy(() => import("./site/TeamPage"));
+const PayReturnPage = lazy(() => import("./site/PaymentPages").then((m) => ({ default: m.PayReturnPage })));
+const BookingsPage = lazy(() => import("./site/PaymentPages").then((m) => ({ default: m.BookingsPage })));
+const ChoosePage = lazy(() => import("./site/PaymentPages").then((m) => ({ default: m.ChoosePage })));
+const MockPayPage = lazy(() => import("./site/PaymentPages").then((m) => ({ default: m.MockPayPage })));
 const VisitorGuidePage = lazy(() => import("./site/VisitorGuidePage"));
 const SavedPage = lazy(() => import("./site/SavedPage"));
 const GuideApp = lazy(() => import("./guide/GuideApp"));
@@ -91,6 +95,10 @@ export default function App() {
 }
 
 function SitePage({ path }: { path: string }) {
+  if (path === "/pay/return") return <PayReturnPage />;
+  if (path === "/pay/mock") return <MockPayPage />;
+  if (path === "/bookings") return <BookingsPage />;
+  if (path === "/bookings/choose") return <ChoosePage />;
   const [, section, slug, extra] = path.split("/");
   if (extra) return <NotFound />;
   if (slug) {
