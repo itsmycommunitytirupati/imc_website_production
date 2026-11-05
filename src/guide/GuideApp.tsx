@@ -336,7 +336,7 @@ function CuratedBubble({ a, offline }: { a: Answer; offline: boolean }) {
       {a.ask && <p className="mt-3 text-sm font-medium">{t(a.ask)}</p>}
       {offline && (
         <p className="mt-3 flex items-center gap-1.5 text-[11px] text-muted">
-          <WifiOff className="h-3.5 w-3.5" /> {t("From IMC's saved local notes; the live guide is busy right now.")}
+          <WifiOff className="h-3.5 w-3.5" /> {t("From IMC's saved local notes. The live guide is busy right now.")}
         </p>
       )}
     </div>

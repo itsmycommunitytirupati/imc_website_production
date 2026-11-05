@@ -21,7 +21,7 @@ export const TOPICS: Topic[] = [
         heading: "Darshan options",
         points: [
           "Free (Sarva) darshan needs no booking, but the wait can run many hours on weekends and festival days.",
-          "Special Entry Darshan gives you a time slot. Book it on the official TTD portal; slots are released in advance and go quickly.",
+          "Special Entry Darshan gives you a time slot. Book it on the official TTD portal. Slots open in advance and go quickly.",
           "Walking up? Footpath pilgrims can get darshan tokens on the route when they are being issued. Check the current status before you start.",
           "Travelling with elders or someone with a disability? Look for the senior-citizen and differently-abled quota on the official portal.",
         ],
@@ -30,7 +30,7 @@ export const TOPICS: Topic[] = [
         heading: "Before you go up",
         points: [
           "Carry a government photo ID for every adult. It is needed for darshan and room bookings.",
-          "Traditional dress is expected for darshan: dhoti or kurta-pyjama for men; saree, half-saree or churidar with dupatta for women.",
+          "Traditional dress is expected for darshan. Men wear a dhoti or kurta-pyjama, and women a saree, half-saree or churidar with dupatta.",
           "Phones, cameras and bags are not allowed inside the temple. Use the free deposit counters.",
           "Vehicles and bags are checked at the Alipiri toll gate at the foot of the ghat road.",
         ],
@@ -55,7 +55,7 @@ export const TOPICS: Topic[] = [
       {
         heading: "Arriving",
         points: [
-          "Tirupati railway station is in the town centre; Renigunta Junction is about 10 km away.",
+          "Tirupati railway station is in the town centre. Renigunta Junction is about 10 km away.",
           "Tirupati airport is at Renigunta, roughly 15 km from town.",
           "Autos and app cabs are easy to find at the station, bus stand and airport.",
         ],
@@ -114,7 +114,7 @@ export const TOPICS: Topic[] = [
           "Sri Padmavathi Ammavari Temple at Tiruchanur is about 5 km from town.",
           "Kapila Theertham, a temple and waterfall at the foot of the hills.",
           "Chandragiri Fort, a Vijayanagara-era fort with a small museum, is about 15 km away.",
-          "Sri Kalahasti Temple is about 35 km away; the town is also home to Kalamkari art.",
+          "Sri Kalahasti Temple is about 35 km away. The town is also home to Kalamkari art.",
           "Talakona Waterfall sits inside the Sri Venkateswara National Park, a couple of hours' drive away.",
           "The Sri Venkateswara Zoological Park is big, green and great with kids.",
         ],
@@ -146,7 +146,7 @@ export const BEFORE_YOU_GO = [
   "Booking confirmations from the official portal",
   "Phones and bags go into the free deposit counters",
   "Water, a light snack and comfortable footwear",
-  "A little cash; UPI works almost everywhere",
+  "A little cash. UPI works almost everywhere",
 ];
 
 // Approximate, from Tirupati town centre.

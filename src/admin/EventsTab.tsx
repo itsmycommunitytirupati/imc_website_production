@@ -6,6 +6,7 @@ import { CalendarPlus, ChevronDown, ChevronLeft, ChevronRight, ExternalLink, Ima
 import { ApiError, api, formatTime, formatWhen, imageUrl, istToday, uploadImage, useApi, type EventItem } from "../lib/api";
 import { EventTicket } from "../site/PosterDeck";
 import { uploadError } from "./photoFields";
+import { usePublicLink } from "../site/kit";
 
 type Row = Record<string, unknown> & { id: number };
 
@@ -33,6 +34,7 @@ export default function EventsTab({ onChange }: { onChange?: () => void }) {
   const [month, setMonth] = useState(() => istToday().slice(0, 7));
   const [editing, setEditing] = useState<{ row: Row | null; date?: string } | null>(null);
   const [toast, setToast] = useState("");
+  const publicLink = usePublicLink();
 
   const byDay = useMemo(() => {
     const map = new Map<string, Row[]>();
@@ -90,7 +92,7 @@ export default function EventsTab({ onChange }: { onChange?: () => void }) {
                     <Tag tone={r.status === "cancelled" ? "red" : Number(r.published) ? "green" : "stone"}>{r.status === "cancelled" ? "cancelled" : Number(r.published) ? "published" : "draft"}</Tag>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-right">
-                    <a href={`/events/${r.slug}`} target="_blank" rel="noopener noreferrer" className="mr-2 inline-flex rounded-lg p-1.5 text-muted hover:bg-stone-100" aria-label="View on site"><ExternalLink className="h-4 w-4" /></a>
+                    <a href={publicLink(`/events/${r.slug}`)} target="_blank" rel="noopener noreferrer" className="mr-2 inline-flex rounded-lg p-1.5 text-muted hover:bg-stone-100" aria-label="View on site"><ExternalLink className="h-4 w-4" /></a>
                     <button onClick={() => setEditing({ row: r })} className="rounded-lg border border-line px-2.5 py-1 text-xs font-semibold hover:border-brand/50 hover:text-brand">Edit</button>
                   </td>
                 </tr>

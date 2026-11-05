@@ -59,7 +59,7 @@ function Hero() {
             </span>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted sm:text-xl">
-            {t("Meetups, circles and weekend plans run by people who live here. Browse first; join when it feels right.")}
+            {t("Meetups, circles and weekend plans run by people who live here. Look around first and join when it feels right.")}
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link to="/events" className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-7 py-4 text-lg font-semibold text-white shadow-lg shadow-brand/25 transition hover:-translate-y-0.5 hover:bg-brand-dark">

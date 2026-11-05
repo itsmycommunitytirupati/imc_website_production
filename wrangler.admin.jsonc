@@ -1,0 +1,38 @@
+// Admin-only Worker on admin.imctirupati.com, so IMC can manage events before the public site
+// launches. Same code, database, photo storage and Access login as the main Worker
+// (wrangler.jsonc); the hostname admin.* makes the app show the admin (src/App.tsx).
+// Deploy by hand: npm run build && npx wrangler deploy -c wrangler.admin.jsonc
+// After launch the main Worker can take the domain back and this one can be deleted.
+{
+  "name": "imc-admin",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-06",
+  "routes": [{ "pattern": "admin.imctirupati.com", "custom_domain": true }],
+  "workers_dev": false,
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/media/*", "/events/*", "/communities/*", "/stories/*"]
+  },
+  "ai": { "binding": "AI" },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "imc-community", "database_id": "01146fe8-92ed-4d9f-96db-b8c162ad7c51" }
+  ],
+  "kv_namespaces": [{ "binding": "MEDIA", "id": "b569266935bc4145ac091b0f81901d6d" }],
+  "vars": {
+    "GUIDE_MODEL": "@cf/google/gemma-4-26b-a4b-it",
+    "ADMIN_EMAILS": "itsmycommunity.tirupati@gmail.com",
+    "ACCESS_TEAM_DOMAIN": "bold-cherry-7506.cloudflareaccess.com",
+    "ACCESS_AUD": "5193a122c2ae170f3bea54075bdd1aede3c4374f63f24cc372b7f2abf93a2e3e",
+    // Payments are handled by the public Worker; the admin never takes them.
+    "PHONEPE_ENV": "",
+    "EMAIL_FROM": "",
+    // "View on site" links and emails point here until the public launch.
+    "SITE_URL": "https://redesign-imc-website-production.itsmycommunity-tirupati.workers.dev",
+    "TURNSTILE_SITE_KEY": ""
+  },
+  // Keeps sample listings current until the public site (and its own schedule) is live.
+  "triggers": { "crons": ["*/30 * * * *"] },
+  "observability": { "enabled": true }
+}

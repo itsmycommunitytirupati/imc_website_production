@@ -39,7 +39,7 @@ export const ENTRIES: Record<string, Entry> = {
       title: "Here's how darshan works.",
       points: [
         "Free (Sarva) darshan needs no booking, but expect long waits on busy days",
-        "Special Entry Darshan gives a fixed time slot; book it on the official TTD portal",
+        "Special Entry Darshan gives a fixed time slot. Book it on the official TTD portal",
         "Carry photo ID for every adult and dress traditionally",
         "Phones and bags go into the free deposit counters before you enter",
       ],
@@ -55,7 +55,7 @@ export const ENTRIES: Record<string, Entry> = {
       points: [
         "Men: dhoti, or kurta-pyjama, with an upper cloth",
         "Women: saree, half-saree, or churidar with a dupatta",
-        "Comfortable footwear for the walk; you'll leave it at the footwear counter",
+        "Comfortable footwear for the walk. You'll leave it at the footwear counter",
       ],
       followUps: ["darshan", "day-plan"],
       officialLink: { label: "Check the official dress guidance", url: OFFICIAL.ttdInfo },
@@ -66,7 +66,7 @@ export const ENTRIES: Record<string, Entry> = {
     answer: {
       title: "Parking, the easy way.",
       points: [
-        "Tirumala has several large parking areas; arrive early on weekends",
+        "Tirumala has several large parking areas. Arrive early on weekends",
         "Vehicles are checked at the Alipiri toll gate before the ghat road",
         "Walking up? Park near Alipiri and take the bus back down",
         "In town, autos beat hunting for parking near the temple streets",
@@ -80,7 +80,7 @@ export const ENTRIES: Record<string, Entry> = {
       title: "Getting there and around.",
       points: [
         "APSRTC buses run often from the Tirupati bus stand up to Tirumala (about an hour)",
-        "Renigunta Junction is about 10 km out; the airport is about 15 km",
+        "Renigunta Junction is about 10 km out and the airport about 15 km",
         "Free TTD buses connect the main stops on the hill",
         "Autos and app cabs are easy to find in town",
       ],
@@ -132,7 +132,7 @@ export const ENTRIES: Record<string, Entry> = {
       points: [
         "Book darshan (and a room, if staying) on the official TTD portal as early as you can",
         "Carry photo ID for every adult and dress traditionally",
-        "Go up by bus or cab in the morning; keep the whole day free",
+        "Go up by bus or cab in the morning and keep the whole day free",
         "Leave phones and bags at the free deposit counters before the temple",
       ],
       ask: "What would you like to sort out next?",
@@ -146,7 +146,7 @@ export const ENTRIES: Record<string, Entry> = {
       title: "Travelling with little ones, made easier.",
       points: [
         "Plan darshan around nap times and carry snacks and water",
-        "Keep a change of clothes handy; queues can be long",
+        "Keep a change of clothes handy. Queues can be long",
         "The Sri Venkateswara Zoological Park is a great afternoon for kids",
         "Ask about facilities for families with infants when you book",
       ],

@@ -8,6 +8,7 @@ import { ApiError, api, formatTime, formatWhen, imageUrl, uploadImage, useApi } 
 import { Logo } from "../site/ui";
 import { ImageField, ImagesField, UploadButton } from "./photoFields";
 import EventsTab from "./EventsTab";
+import { usePublicLink } from "../site/kit";
 
 // Admin portal (admin.imctirupati.com, or /admin). Every request goes to /api/admin/*, which
 // checks the Cloudflare Access sign-in and the ADMIN_EMAILS list (worker/admin.ts).
@@ -186,6 +187,7 @@ const Pill = ({ children, tone = "stone" }: { children: ReactNode; tone?: "stone
 const toneFor = (s: string) => (["published", "confirmed", "completed", "done", "added", "scheduled", "active"].includes(s) ? "green" : ["pending", "received", "draft", "new", "waitlist", "reviewing", "planned", "in_progress", "forming"].includes(s) ? "amber" : ["cancelled", "rejected", "removed", "declined", "not_proceeding", "closed"].includes(s) ? "red" : "stone");
 
 function Resource({ config, onChange }: { config: ResourceConfig; onChange?: () => void }) {
+  const publicLink = usePublicLink();
   const { data, loading, error, reload } = useApi<{ rows: Row[] }>(`/api/admin/${config.table}`);
   const [editing, setEditing] = useState<Row | "new" | null>(null);
   const [filter, setFilter] = useState(0);
@@ -258,7 +260,7 @@ function Resource({ config, onChange }: { config: ResourceConfig; onChange?: () 
                   <td className="whitespace-nowrap px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
                       {config.quick?.(r, (patch) => save(r.id, patch))}
-                      {config.link?.(r) && <a href={config.link(r)!} target="_blank" rel="noopener noreferrer" className="rounded-lg p-1.5 text-muted hover:bg-stone-100" aria-label="View on site"><ExternalLink className="h-4 w-4" /></a>}
+                      {config.link?.(r) && <a href={publicLink(config.link(r)!)} target="_blank" rel="noopener noreferrer" className="rounded-lg p-1.5 text-muted hover:bg-stone-100" aria-label="View on site"><ExternalLink className="h-4 w-4" /></a>}
                       {config.fields.length > 0 && <button onClick={() => setEditing(r)} className="rounded-lg p-1.5 text-muted hover:bg-stone-100" aria-label="Edit"><Pencil className="h-4 w-4" /></button>}
                     </div>
                   </td>

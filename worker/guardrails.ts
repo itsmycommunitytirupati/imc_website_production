@@ -38,6 +38,8 @@ export function clean(text: string, max = 360) {
     .replace(/\*\*|__|`|^#+\s*/g, "")
     // Evidence labels like "(Source: E1)" or "[E2, E3]" belong in the sources list, not the text.
     .replace(/\s*[([]\s*(?:sources?\s*:?\s*)?E\d+(?:\s*,\s*E\d+)*\s*[)\]]/gi, "")
+    // House style: short sentences, no semicolons ("x; y" becomes "x. Y").
+    .replace(/(?<!&#?\w+)\s*;\s*(\S)/g, (_, c: string) => `. ${c.toUpperCase()}`)
     .replace(/\s+/g, " ")
     .trim();
   if (t.length <= max) return t;

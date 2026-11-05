@@ -78,7 +78,7 @@ export default function EventPage({ slug }: { slug: string }) {
               {e.price_note && <span className="block text-sm text-muted">{e.price_note}</span>}
             </Info>
             <Info icon={<Users />} label={t("Spots")}>
-              {e.capacity ? (e.seats_left === 0 ? t("Full; join the waitlist") : `${e.seats_left} / ${e.capacity} ${t("spots left")}`) : t("Open to all")}
+              {e.capacity ? (e.seats_left === 0 ? t("Full. Join the waitlist") : `${e.seats_left} / ${e.capacity} ${t("spots left")}`) : t("Open to all")}
               <span className="block text-sm text-muted">{t("Hosted by")} {e.organizer_name}</span>
             </Info>
           </dl>

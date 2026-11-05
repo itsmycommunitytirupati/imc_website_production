@@ -24,7 +24,7 @@ export async function handleCommunity(request: Request, env: Env, path: string):
   const seg = path.split("/").filter(Boolean); // ["api", "events", "slug"]
 
   if (method === "GET" && path === "/api/config") {
-    return json({ turnstileSiteKey: env.TURNSTILE_SITE_KEY || "", humanCheck: Boolean(env.TURNSTILE_SECRET), payments: Boolean(gatewayMode(env)) });
+    return json({ turnstileSiteKey: env.TURNSTILE_SITE_KEY || "", humanCheck: Boolean(env.TURNSTILE_SECRET), payments: Boolean(gatewayMode(env)), siteUrl: env.SITE_URL || "" });
   }
 
   if (method === "GET" && path === "/api/stats") {

@@ -89,7 +89,7 @@ export default function VisitorGuidePage() {
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
         <Reveal>
-          <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{t("Your journey up the hills")}</h2>
+          <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{t("Up the hills, step by step")}</h2>
           <p className="mt-2 text-muted">{t("How a Tirumala visit usually flows, from arrival to the last blessing.")}</p>
         </Reveal>
         <ol className="relative mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 xl:gap-3">

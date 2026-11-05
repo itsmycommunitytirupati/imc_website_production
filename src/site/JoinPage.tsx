@@ -145,7 +145,7 @@ export function JoinForm({ preset = "", compact = false }: { preset?: string; co
         <label className="block">
           <span className="text-sm font-semibold">{t("Start with a community (optional)")}</span>
           <select value={form.values.group} onChange={(x) => form.set("group", x.target.value)} className="mt-1.5 w-full rounded-xl border border-line bg-white px-4 py-3">
-            <option value="">{t("Not sure yet; suggest one")}</option>
+            <option value="">{t("Not sure yet, suggest one")}</option>
             {data?.groups.map((g) => <option key={g.slug} value={g.slug}>{g.name}</option>)}
           </select>
         </label>

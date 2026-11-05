@@ -90,7 +90,7 @@ export function useForm<T extends Record<string, unknown>>(initial: T) {
       const err = e instanceof ApiError ? e : new ApiError(0, "offline");
       setErrors(err.fields);
       setErrorCode(err.code);
-      setFormError(messages[err.code] ?? (err.code === "invalid" ? "" : err.code === "rate_limited" ? "Too many tries. Please wait a few minutes." : err.code === "offline" ? "You seem to be offline. Your details are still here; try again." : "Something went wrong. Your details are still here; please try again."));
+      setFormError(messages[err.code] ?? (err.code === "invalid" ? "" : err.code === "rate_limited" ? "Too many tries. Please wait a few minutes." : err.code === "offline" ? "You seem to be offline. Your details are still here, so try again." : "Something went wrong. Your details are still here, so please try again."));
       return null;
     } finally {
       setSubmitting(false);
@@ -143,9 +143,21 @@ export function Honeypot({ value, onChange }: { value: string; onChange: (v: str
 interface SiteConfig {
   turnstileSiteKey: string;
   payments: boolean;
+  siteUrl?: string;
 }
 let configPromise: Promise<SiteConfig> | null = null;
 const loadConfig = () => (configPromise ??= api<SiteConfig>("/api/config").catch(() => ({ turnstileSiteKey: "", payments: false })));
+
+/**
+ * Where "view on site" links go. On the admin's own host (admin.imctirupati.com) the public pages
+ * live elsewhere, so links use the Worker's SITE_URL; everywhere else they stay relative.
+ */
+export function usePublicLink() {
+  const config = useSiteConfig();
+  const onAdminHost = typeof window !== "undefined" && window.location.hostname.startsWith("admin.");
+  const base = onAdminHost ? (config?.siteUrl ?? "").replace(/\/$/, "") : "";
+  return (path: string) => `${base}${path}`;
+}
 
 /** Public settings from the Worker (Turnstile key, whether online payment is switched on). */
 export function useSiteConfig() {

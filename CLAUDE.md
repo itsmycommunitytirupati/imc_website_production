@@ -101,7 +101,8 @@ the page falls back to the curated answers in `content/guide.ts`.
 - **Database:** D1 `imc-community` (binding `DB`, id in `wrangler.jsonc`). Schema and seed in
   `migrations/` (0001 schema, 0002 sample seed, 0003 official community names, 0004 interest ids,
   0005 gallery + team seeded with IMC's existing 31 photos and 19 team members, 0006 payments,
-  credit ledger, refunds, login codes and sessions).
+  credit ledger, refunds, login codes and sessions, 0007 sample date catch-up, 0008 sample text
+  without semicolons).
   Apply with `npx wrangler d1 migrations apply imc-community --local` (dev) or `--remote` (live).
   Add new migrations as numbered files; never edit applied ones.
 - **Public API (`worker/community.ts`):** `GET /api/events|groups|adda|opportunities|stories|stats|config`,
@@ -110,6 +111,11 @@ the page falls back to the curated answers in `content/guide.ts`.
   field `website`, per-IP rate limits, and Cloudflare Turnstile once `TURNSTILE_SITE_KEY` (var) and
   `TURNSTILE_SECRET` (secret, set by the user) exist. RSVP capacity is enforced in one SQL statement;
   repeat RSVPs return the existing booking.
+- **Admin Worker (until launch):** `admin.imctirupati.com` is served by a separate Worker,
+  `imc-admin` (`wrangler.admin.jsonc`: same code, D1, KV and Access vars; `SITE_URL` = the preview
+  so "view on site" links work; a 30-minute cron keeps sample dates current). It is not connected
+  to Git: after admin changes run `npm run build && npx wrangler deploy -c wrangler.admin.jsonc`.
+  At launch, move the custom domain back to the main Worker and delete `imc-admin`.
 - **Admin API (`worker/admin.ts`):** `/api/admin/*`, Cloudflare Access JWT checked against
   `ACCESS_TEAM_DOMAIN` + `ACCESS_AUD`, email must be in `ADMIN_EMAILS`. Until those vars are set it
   answers 503 `not_configured`. Access app "IMC Admin" (team `bold-cherry-7506`) guards
@@ -244,6 +250,10 @@ P2 signature features). Update its checklist statuses as work lands. Non-negotia
   Let's fix that.", "Proof that we actually touched grass this weekend.", "Spotted yourself? Tag a
   friend, or ask us to take it down.", "Scene konchem silent ga undhi.", "You're in. Introvert mode
   can remain on."
+- **House style: write like a person from Tirupati, not like an AI.** Short plain sentences, no
+  semicolons anywhere visitors read (site, sample data, emails; the guide's `clean()` also turns
+  "x; y" into "x. Y"), no filler words such as vibrant, seamless, curated, journey, unlock. Prices
+  and distances as ranges ("₹700–1,800") are fine. Member quotes stay as written.
 - **Languages: English, Telugu, Tamil, Hindi.** Every visitor-facing string goes through
   `useT()` (`src/lib/i18n.ts`); dictionaries in `src/i18n/{te,ta,hi}.ts` are keyed by the English
   text, and missing keys fall back to English. After changing any copy, run

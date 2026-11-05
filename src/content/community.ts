@@ -12,7 +12,7 @@ export const PASSION_CARDS = [
   {
     note: "Create. Collab. Build culture. ⭐",
     title: "Host an experience",
-    text: "Have a passion that deserves its own circle? Bring the idea; we'll help with people, venue and promotion.",
+    text: "Have a passion that deserves its own circle? Bring the idea and we'll help with people, venue and promotion.",
     cta: "Start something",
     image: IMC_PHOTOS.danceStudio,
     action: "host" as const,

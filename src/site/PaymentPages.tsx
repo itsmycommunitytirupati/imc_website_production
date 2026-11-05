@@ -283,7 +283,7 @@ export function ChoosePage() {
         <p className="mt-2 text-muted">{t("Sorry about that. You paid")} {rupees(info.total_paise)}. {t("What would you like?")}</p>
         {resolved ? (
           <p className="mt-6 flex items-center gap-2 rounded-2xl bg-emerald-50 p-4 text-emerald-900" role="status">
-            <CheckCircle2 className="h-5 w-5" /> {resolved === "credit" ? t("Done. The full amount is now IMC credit.") : t("Done. Your refund has started; banks usually show it within a few working days.")}
+            <CheckCircle2 className="h-5 w-5" /> {resolved === "credit" ? t("Done. The full amount is now IMC credit.") : t("Done. Your refund has started. Banks usually show it within a few working days.")}
           </p>
         ) : (
           <div className="mt-6 grid gap-3">

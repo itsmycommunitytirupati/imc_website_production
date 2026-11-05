@@ -45,7 +45,7 @@ export default function PayForm({ e }: { e: EventItem }) {
       cancelled: "This event was just cancelled.",
       past: "This event has already started.",
       payments_unavailable: "Online payment isn't available right now. Please try again later.",
-      gateway_error: "We couldn't reach PhonePe. Nothing was charged; please try again.",
+      gateway_error: "We couldn't reach PhonePe. Nothing was charged, so please try again.",
       credit_changed: "Your IMC credit changed. Please try again.",
       human_check: "Please complete the check above and try again.",
     });
