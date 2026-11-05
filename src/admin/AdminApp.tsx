@@ -6,6 +6,8 @@ import {
 import { usePageTitle } from "../lib/site";
 import { ApiError, api, formatTime, formatWhen, imageUrl, uploadImage, useApi } from "../lib/api";
 import { Logo } from "../site/ui";
+import { ImageField, ImagesField, UploadButton } from "./photoFields";
+import EventsTab from "./EventsTab";
 
 // Admin portal (admin.imctirupati.com, or /admin). Every request goes to /api/admin/*, which
 // checks the Cloudflare Access sign-in and the ADMIN_EMAILS list (worker/admin.ts).
@@ -77,7 +79,7 @@ export default function AdminApp() {
       </aside>
       <main className="min-w-0 p-4 sm:p-8">
         {tab === "overview" && <OverviewTab data={overview.data} go={setTab} />}
-        {tab === "events" && <Resource key="events" config={EVENTS} onChange={overview.reload} />}
+        {tab === "events" && <EventsTab onChange={overview.reload} />}
         {tab === "rsvps" && <RsvpsTab />}
         {tab === "payments" && <PaymentsTab />}
         {tab === "gallery" && <Resource key="gallery" config={GALLERY} />}
@@ -400,88 +402,6 @@ function Editor({ config, row, onClose, onSaved }: { config: ResourceConfig; row
 
 /* ------------------------------------------------------------------ photos */
 
-function UploadButton({ multiple = false, onFiles, busy, label = "Upload photo" }: { multiple?: boolean; onFiles: (files: File[]) => void; busy: boolean; label?: string }) {
-  const ref = useRef<HTMLInputElement>(null);
-  return (
-    <>
-      <input ref={ref} type="file" accept="image/jpeg,image/png,image/webp,image/heic" multiple={multiple} hidden onChange={(e) => {
-        const files = [...(e.target.files ?? [])];
-        e.target.value = "";
-        if (files.length) onFiles(files);
-      }} />
-      <button type="button" disabled={busy} onClick={() => ref.current?.click()} className="inline-flex items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-sm font-semibold hover:border-brand/50 disabled:opacity-60">
-        <Upload className="h-4 w-4" /> {busy ? "Uploading…" : label}
-      </button>
-    </>
-  );
-}
-
-const uploadError = (e: unknown) =>
-  e instanceof ApiError && e.code === "too_large" ? "That photo is too big even after shrinking." : e instanceof ApiError && e.status === 401 ? "Your sign-in expired. Reload the page." : "Upload failed. Try a JPEG or PNG.";
-
-function ImageField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState("");
-  const upload = async ([file]: File[]) => {
-    setBusy(true);
-    setErr("");
-    try {
-      onChange(await uploadImage(file));
-    } catch (e) {
-      setErr(uploadError(e));
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <div className="mt-1 flex items-start gap-3">
-      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-stone-100 ring-1 ring-line">
-        {value && <img src={imageUrl(value)} alt="" className="h-full w-full object-cover" />}
-      </div>
-      <div className="min-w-0 flex-1 space-y-2">
-        <UploadButton onFiles={upload} busy={busy} label={value ? "Replace photo" : "Upload photo"} />
-        <input value={value} onChange={(e) => onChange(e.target.value)} placeholder="or paste a link" className="w-full rounded-lg border border-line px-3 py-1.5 text-xs text-muted" />
-        {err && <p className="text-xs text-red-700">{err}</p>}
-      </div>
-    </div>
-  );
-}
-
-function ImagesField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState("");
-  const list = value.split("\n").map((s) => s.trim()).filter(Boolean);
-  const upload = async (files: File[]) => {
-    setBusy(true);
-    setErr("");
-    const added: string[] = [];
-    for (const f of files) {
-      try {
-        added.push(await uploadImage(f));
-      } catch (e) {
-        setErr(uploadError(e));
-      }
-    }
-    onChange([...list, ...added].join("\n"));
-    setBusy(false);
-  };
-  return (
-    <div className="mt-1 space-y-2">
-      <div className="flex flex-wrap gap-2">
-        {list.map((img, i) => (
-          <div key={`${img}-${i}`} className="relative h-20 w-20 overflow-hidden rounded-lg ring-1 ring-line">
-            <img src={imageUrl(img)} alt="" className="h-full w-full object-cover" />
-            {i === 0 && <span className="absolute left-1 top-1 rounded bg-ink px-1 text-[10px] font-bold text-white">Cover</span>}
-            <button type="button" onClick={() => onChange(list.filter((_, j) => j !== i).join("\n"))} aria-label="Remove photo" className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-white/90 text-ink"><X className="h-3 w-3" /></button>
-          </div>
-        ))}
-      </div>
-      <UploadButton multiple onFiles={upload} busy={busy} label="Add photos" />
-      {err && <p className="text-xs text-red-700">{err}</p>}
-    </div>
-  );
-}
-
 function GalleryUploader({ done }: { done: () => void }) {
   const groups = useApi<{ rows: Row[] }>("/api/admin/groups");
   const [groupId, setGroupId] = useState("");
@@ -551,70 +471,6 @@ const when = (v: unknown) => (v ? `${formatWhen(String(v))}, ${formatTime(String
 const created = (v: unknown) => (v ? new Date(`${String(v).replace(" ", "T")}Z`).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" }) : "");
 
 /* ------------------------------------------------------------------ configs */
-
-const EVENTS: ResourceConfig = {
-  table: "events",
-  title: "Events",
-  intro: "Times are Tirupati time. Cancel instead of deleting, so people who RSVP'd see what happened.",
-  create: true,
-  defaults: { status: "scheduled", category: "meetups", published: 1, beginner_friendly: 1, capacity: 30, price_inr: 0 },
-  filters: [
-    { label: "Upcoming", test: (r) => String(r.start_at) >= new Date(Date.now() + 5.5 * 3600_000).toISOString().slice(0, 16) },
-    { label: "All", test: () => true },
-    { label: "Unpublished", test: (r) => !yes(r.published) },
-  ],
-  columns: [
-    { label: "Event", render: (r) => <span className="font-semibold">{String(r.title)} <SampleTag r={r} /></span> },
-    { label: "When", render: (r) => when(r.start_at) },
-    { label: "Booked", render: (r) => `${r.booked ?? 0}${Number(r.capacity) ? ` / ${r.capacity}` : ""}` },
-    { label: "Status", render: (r) => <><Pill tone={toneFor(String(r.status))}>{String(r.status)}</Pill> {!yes(r.published) && <Pill>hidden</Pill>}</> },
-  ],
-  link: (r) => `/events/${r.slug}`,
-  quick: (r, save) =>
-    r.status === "scheduled" ? (
-      <QuickButton onClick={() => confirm(`Cancel "${r.title}"? People who RSVP'd will see it as cancelled. Then use "Notify payers" so anyone who paid can choose credit or a refund.`) && save({ status: "cancelled" })}>Cancel</QuickButton>
-    ) : r.status === "cancelled" && Number(r.price_inr) > 0 ? (
-      <QuickButton
-        onClick={async () => {
-          if (!confirm("Email everyone who paid for this event a one-tap choice: IMC credit or a refund?")) return;
-          try {
-            const res = await api<{ payers: number; sent: number }>(`/api/admin/events/${r.id}/notify-payers`, { method: "POST", body: "{}" });
-            alert(`${res.sent} of ${res.payers} payers emailed.`);
-          } catch (e) {
-            alert(`Couldn't notify payers (${(e as ApiError).code}).`);
-          }
-        }}
-      >
-        Notify payers
-      </QuickButton>
-    ) : null,
-  fields: [
-    { key: "title", label: "Title", wide: true },
-    { key: "group_id", label: "Community", type: "group" },
-    { key: "category", label: "Category", type: "select", options: ["meetups", "music", "nature", "culture", "food", "sports", "startup"] },
-    { key: "summary", label: "One-line summary", wide: true },
-    { key: "description", label: "Description", type: "textarea" },
-    { key: "start_at", label: "Starts", type: "datetime" },
-    { key: "end_at", label: "Ends", type: "datetime" },
-    { key: "venue", label: "Venue" },
-    { key: "area", label: "Area", help: "Used by the area filter, e.g. Tilak Road." },
-    { key: "address", label: "Address", wide: true },
-    { key: "price_inr", label: "Price (₹, 0 = free)", type: "number" },
-    { key: "price_note", label: "Price note", help: "e.g. Includes breakfast" },
-    { key: "capacity", label: "Capacity (0 = no limit)", type: "number" },
-    { key: "organizer_name", label: "Host shown on page" },
-    { key: "image", label: "Cover photo", type: "image", wide: true },
-    { key: "first_timer_note", label: "Solo No More note", type: "textarea" },
-    { key: "age_note", label: "Age note" },
-    { key: "accessibility_note", label: "Accessibility note" },
-    { key: "cancellation_terms", label: "Cancellation terms", wide: true },
-    { key: "status", label: "Status", type: "select", options: ["scheduled", "cancelled", "completed"] },
-    { key: "slug", label: "Web address", help: "Leave empty to make one from the title." },
-    { key: "beginner_friendly", label: "Good for first-timers (Solo No More)", type: "checkbox" },
-    { key: "published", label: "Published on the site", type: "checkbox" },
-    { key: "is_sample", label: "Sample listing (shows a Sample badge)", type: "checkbox" },
-  ],
-};
 
 const GROUPS: ResourceConfig = {
   table: "groups",

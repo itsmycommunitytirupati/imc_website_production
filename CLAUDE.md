@@ -201,6 +201,9 @@ src/
                        HumanCheck (Turnstile), ShareButton, EventCard, GroupCard, StoryCard, OpportunityCard
   guide/GuideApp.tsx   chat UI; reads ?q= and ?lang= from the home search
   admin/AdminApp.tsx   admin portal; generic Resource table + Editor driven by per-table configs
+  admin/EventsTab.tsx  Events: month calendar (add on a date) + composer (photo drop, text, date/time,
+                       venue, community → category, price/seats, live ticket preview, draft/publish/cancel)
+  admin/photoFields.tsx  shared upload/preview inputs
 worker/                index.ts (routing), community.ts, admin.ts, meta.ts, http.ts, AI guide files
 migrations/            D1 schema and seed
   data.ts, types.ts    real IMC clubs (WINGS_DATA), testimonials, stats, team (from the old site)
