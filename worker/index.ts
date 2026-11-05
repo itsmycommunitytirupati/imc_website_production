@@ -10,6 +10,7 @@ import { handleAdmin } from "./admin";
 import { withShareMeta } from "./meta";
 import { serveMedia } from "./media";
 import { handlePayments, reconcileAll } from "./payments";
+import { rollSamples } from "./samples";
 import { handleAuth } from "./auth";
 
 const LANGS = new Set(["en", "te", "ta", "hi"]);
@@ -101,8 +102,11 @@ export default {
     return env.ASSETS.fetch(request);
   },
 
-  // Every 5 minutes: settle payments whose webhook or return visit never arrived, check refunds.
+  // Every 5 minutes: settle payments whose webhook or return visit never arrived, check refunds,
+  // and move past sample listings forward.
   async scheduled(_event: unknown, env: Env, ctx: ExecutionContext) {
     ctx.waitUntil(reconcileAll(env).catch((err) => console.error("reconcile failed", err instanceof Error ? err.message : err)));
+    // Sample listings roll forward so the site never shows only past placeholders.
+    ctx.waitUntil(rollSamples(env).catch((err) => console.error("sample roll failed", err instanceof Error ? err.message : err)));
   },
 };

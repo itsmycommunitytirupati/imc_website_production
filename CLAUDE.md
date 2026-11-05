@@ -147,7 +147,10 @@ the page falls back to the curated answers in `content/guide.ts`.
 - **Share previews (`worker/meta.ts`):** `/events/*`, `/communities/*`, `/stories/*` run the Worker
   first (`run_worker_first`) to rewrite title/description/og tags from D1.
 - **Sample content:** every seeded row has `is_sample = 1` and shows a **Sample** badge. IMC
-  replaces them from the admin; untick Sample or unpublish when real content exists.
+  replaces them from the admin; untick Sample or unpublish when real content exists. Until then
+  `worker/samples.ts` (cron, plus catch-up migration 0007) moves past sample events and lapsed
+  sample opportunity deadlines forward in 28-day steps, keeping weekday and time. It never touches
+  rows with `is_sample = 0`.
 - **Counts:** no member/event numbers in code. The Communities page shows only what the admin
   saves under "Verified numbers" (`settings.stats`, with who verified and when).
 - **Analytics (`src/lib/analytics.ts`):** GA4 events from the brief (`view_event_list`,
