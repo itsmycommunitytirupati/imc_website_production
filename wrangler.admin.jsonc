@@ -27,7 +27,7 @@
     "ACCESS_AUD": "5193a122c2ae170f3bea54075bdd1aede3c4374f63f24cc372b7f2abf93a2e3e",
     // The admin never takes payments, but it issues refunds, so it needs the same live
     // credentials (and the PHONEPE_CLIENT_SECRET secret on this Worker too).
-    "PHONEPE_ENV": "production",
+    "PHONEPE_ENV": "sandbox",
     "PHONEPE_CLIENT_ID": "M23JWTO00A1DY_2611071441",
     "PHONEPE_CLIENT_VERSION": "1",
     "EMAIL_FROM": "",

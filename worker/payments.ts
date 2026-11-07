@@ -5,7 +5,7 @@ import type { Env } from "./env";
 import { rateLimited } from "./guardrails";
 import { humanCheck, int, json, nowLocal, randomRef, readJson, seatsTakenSql, sha256, str, type Fields } from "./http";
 import { isEmail, normEmail, sessionEmail } from "./auth";
-import { createOrder, gatewayMode, orderStatus, refund, refundStatus, webhookAuthorized } from "./phonepe";
+import { canTakePayments, createOrder, gatewayMode, orderStatus, refund, refundStatus, webhookAuthorized } from "./phonepe";
 import { rupees, sendEmail } from "./email";
 
 const HOLD_MINUTES = 15;
@@ -253,7 +253,7 @@ export async function handlePayments(request: Request, env: Env, path: string): 
     let gateway = total - credit;
     if (gateway > 0 && gateway < 100) gateway = 100; // PhonePe's minimum is ₹1
     const creditUsed = total - gateway;
-    if (gateway > 0 && !gatewayMode(env)) return json({ error: "payments_unavailable" }, 503);
+    if (gateway > 0 && !canTakePayments(env, request)) return json({ error: "payments_unavailable" }, 503);
 
     const ref = randomRef();
     const merchantOrderId = `IMC${Date.now().toString(36)}${randomHex(4)}`.toUpperCase();

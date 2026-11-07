@@ -30,9 +30,10 @@
     // PhonePe: "production" or "sandbox" once PHONEPE_CLIENT_ID is filled and the secret is set
     // (npx wrangler secret put PHONEPE_CLIENT_SECRET). Empty = paid events take RSVPs, pay at venue.
     // Sandbox accepts test payments, so never leave it on "sandbox" for the public site.
-    // Live credentials: payments switch on only once the PHONEPE_CLIENT_SECRET secret exists.
+    // TEST MODE for now: IMC's current keys are sandbox keys. Switch to "production" with live
+    // keys before launch. Test mode only takes payments on preview addresses (canTakePayments).
     // Sample events (is_sample = 1) never take payment.
-    "PHONEPE_ENV": "production",
+    "PHONEPE_ENV": "sandbox",
     "PHONEPE_CLIENT_ID": "M23JWTO00A1DY_2611071441",
     "PHONEPE_CLIENT_VERSION": "1",
     // Webhook Basic credentials set in PhonePe's dashboard; the password is a secret (PHONEPE_WEBHOOK_PASSWORD).

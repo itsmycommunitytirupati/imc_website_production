@@ -27,6 +27,18 @@ export function gatewayMode(env: Env): "production" | "sandbox" | "mock" | null 
   return null;
 }
 
+/**
+ * Whether people can pay on this address. Test mode (sandbox) only takes payments on preview
+ * addresses (<alias>-imc-website-production…workers.dev) and local dev, never on imctirupati.com
+ * or the main workers.dev address, so a forgotten "sandbox" can't sell real seats for fake money.
+ */
+export function canTakePayments(env: Env, request: Request) {
+  const mode = gatewayMode(env);
+  if (mode !== "sandbox") return Boolean(mode);
+  const host = new URL(request.headers.get("origin") || request.url).hostname;
+  return /^[a-z0-9-]+-imc-website-production\./.test(host) || host === "127.0.0.1" || host === "localhost";
+}
+
 let token: { value: string; expiresAt: number; key: string } | null = null;
 
 async function accessToken(env: Env, mode: "production" | "sandbox"): Promise<string> {

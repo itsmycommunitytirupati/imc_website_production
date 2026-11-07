@@ -144,7 +144,15 @@ the page falls back to the curated answers in `content/guide.ts`.
   `PHONEPE_CLIENT_VERSION`, `PHONEPE_WEBHOOK_USERNAME`; secrets `PHONEPE_CLIENT_SECRET`,
   `PHONEPE_WEBHOOK_PASSWORD` (set by the user with `npx wrangler secret put`). Never leave
   `sandbox` on for the public site. `mock` works only with `ADMIN_DEV_BYPASS=1` (local), via
-  `/pay/mock`.
+  `/pay/mock`. **Status (7 Nov 2026):** IMC's current keys (Client ID `M23JWTO00A1DY_2611071441`)
+  are sandbox keys, so both Workers run `PHONEPE_ENV=sandbox`. `canTakePayments()` only lets test
+  mode take payments on preview addresses and local dev (never imctirupati.com or the main
+  workers.dev); the pay form shows a "Test mode" note. Before launch: live keys from PhonePe (Test
+  Mode off, "PG Standard Checkout V2" activated), set `production`, update the Client ID.
+  `/api/health?check=payments` (add `&probe=sandbox|production`) tests the keys without exposing them.
+  **Secrets on the main Worker:** add them with `npx wrangler versions secret put NAME` (stores them
+  on a new version without deploying). The dashboard and `wrangler secret put` deploy the newest
+  upload, which is the branch preview, straight to production.
 - **Email and "My bookings" (`worker/email.ts`, `worker/auth.ts`):** Resend API (`RESEND_API_KEY`
   secret, `EMAIL_FROM` var on a verified domain) sends receipts, cancellation choices and 6-digit
   sign-in codes. `/bookings` signs in by code (HttpOnly session cookie, hashes only in D1) and shows

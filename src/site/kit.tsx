@@ -143,6 +143,7 @@ export function Honeypot({ value, onChange }: { value: string; onChange: (v: str
 interface SiteConfig {
   turnstileSiteKey: string;
   payments: boolean;
+  paymentsTest?: boolean;
   siteUrl?: string;
 }
 let configPromise: Promise<SiteConfig> | null = null;

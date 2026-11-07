@@ -4,7 +4,7 @@ import { Link } from "../lib/router";
 import { useT } from "../lib/i18n";
 import { api, formatTime, formatWhen, post, type EventItem } from "../lib/api";
 import { track } from "../lib/analytics";
-import { Honeypot, HumanCheck, SubmitButton, TextArea, TextInput, useForm } from "./kit";
+import { Honeypot, HumanCheck, SubmitButton, TextArea, TextInput, useForm, useSiteConfig } from "./kit";
 
 interface Me {
   email: string;
@@ -18,6 +18,7 @@ export const rupees = (paise: number) => `₹${(paise / 100).toLocaleString("en-
 export default function PayForm({ e }: { e: EventItem }) {
   const t = useT();
   const [me, setMe] = useState<Me | null>(null);
+  const config = useSiteConfig();
   const form = useForm({ name: "", email: "", phone: "", party_size: 1, note: "", website: "", use_credit: true });
   const [token, setToken] = useState("");
   const [done, setDone] = useState<{ ref: string; repeat?: boolean } | null>(null);
@@ -88,6 +89,11 @@ export default function PayForm({ e }: { e: EventItem }) {
       noValidate
       className="relative space-y-4 rounded-3xl border border-line bg-white p-6 shadow-lg"
     >
+      {config?.paymentsTest && (
+        <p className="rounded-xl border-2 border-dashed border-amber-400 bg-amber-50 p-3 text-xs font-semibold text-amber-900">
+          Test mode: PhonePe's test page, no real money moves.
+        </p>
+      )}
       <div>
         <p className="font-display text-2xl font-extrabold">{t("Book your spot")}</p>
         <p className="mt-1 text-sm text-muted">{t("Your spot is held for 15 minutes while you pay. It's confirmed only once PhonePe confirms the payment.")}</p>

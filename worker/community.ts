@@ -2,7 +2,7 @@
 import type { Env } from "./env";
 import { rateLimited } from "./guardrails";
 import { checkPerson, humanCheck, int, invalid, json, nowLocal, parseList, randomRef, readJson, seatsTakenSql, sha256, str, today, type Fields } from "./http";
-import { gatewayMode } from "./phonepe";
+import { canTakePayments, gatewayMode } from "./phonepe";
 
 const EVENT_COLS = `e.id, e.slug, e.title, e.category, e.summary, e.start_at, e.end_at, e.venue, e.area, e.price_inr, e.price_note,
   e.capacity, e.organizer_name, e.image, e.beginner_friendly, e.status, e.is_sample, g.slug AS group_slug, g.name AS group_name,
@@ -24,7 +24,7 @@ export async function handleCommunity(request: Request, env: Env, path: string):
   const seg = path.split("/").filter(Boolean); // ["api", "events", "slug"]
 
   if (method === "GET" && path === "/api/config") {
-    return json({ turnstileSiteKey: env.TURNSTILE_SITE_KEY || "", humanCheck: Boolean(env.TURNSTILE_SECRET), payments: Boolean(gatewayMode(env)), siteUrl: env.SITE_URL || "" });
+    return json({ turnstileSiteKey: env.TURNSTILE_SITE_KEY || "", humanCheck: Boolean(env.TURNSTILE_SECRET), payments: canTakePayments(env, request), paymentsTest: gatewayMode(env) !== "production", siteUrl: env.SITE_URL || "" });
   }
 
   if (method === "GET" && path === "/api/stats") {
