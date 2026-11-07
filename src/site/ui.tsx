@@ -279,6 +279,7 @@ export function Footer() {
           <nav className="flex flex-wrap gap-x-4 gap-y-1" aria-label="Legal">
             <Link to="/privacy" className="hover:text-white">{t("Privacy")}</Link>
             <Link to="/terms" className="hover:text-white">{t("Terms")}</Link>
+            <Link to="/guidelines" className="hover:text-white">{t("Community guidelines")}</Link>
             <Link to="/report?type=photo_removal" className="hover:text-white">{t("Photo removal")}</Link>
             <Link to="/report" className="hover:text-white">{t("Report a concern")}</Link>
           </nav>

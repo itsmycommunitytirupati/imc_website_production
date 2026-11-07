@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from "react";
-import { useLocation, navigate } from "./lib/router";
+import { useLocation } from "./lib/router";
 import { trackReturnVisit } from "./lib/analytics";
 import { GopuramIcon, SiteShell } from "./site/ui";
 import HomePage from "./site/HomePage";
@@ -29,7 +29,7 @@ const VisitorGuidePage = lazy(() => import("./site/VisitorGuidePage"));
 const SavedPage = lazy(() => import("./site/SavedPage"));
 const GuideApp = lazy(() => import("./guide/GuideApp"));
 const AdminApp = lazy(() => import("./admin/AdminApp"));
-const LegalPage = lazy(() => import("./components/LegalPage"));
+const LegalPage = lazy(() => import("./site/LegalPage"));
 
 // One build serves three surfaces. The hostname picks the surface in
 // production; /guide and /admin let previews and workers.dev reach them too.
@@ -77,12 +77,8 @@ export default function App() {
   if (IS_MAINTENANCE) return <MaintenancePage />;
 
   const surface = surfaceFor(window.location.hostname, path);
-  if (surface !== "site" || path === "/privacy" || path === "/terms") {
-    return (
-      <Suspense fallback={<Loading />}>
-        {surface === "guide" ? <GuideApp /> : surface === "admin" ? <AdminApp /> : <LegalPage onBack={() => navigate("/")} />}
-      </Suspense>
-    );
+  if (surface !== "site") {
+    return <Suspense fallback={<Loading />}>{surface === "guide" ? <GuideApp /> : <AdminApp />}</Suspense>;
   }
 
   return (
@@ -136,6 +132,12 @@ function SitePage({ path }: { path: string }) {
       return <TeamPage />;
     case "/saved":
       return <SavedPage />;
+    case "/terms":
+      return <LegalPage doc="terms" />;
+    case "/privacy":
+      return <LegalPage doc="privacy" />;
+    case "/guidelines":
+      return <LegalPage doc="guidelines" />;
     default:
       return <NotFound />;
   }

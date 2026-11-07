@@ -35,7 +35,7 @@ Site routes (switch in `App.tsx`; dynamic segments are split by hand):
 | `/saved` | `SavedPage.tsx` | Bookmarked events (device only) |
 | `/bookings`, `/bookings/choose` | `PaymentPages.tsx` | Email-code sign-in, bookings and IMC credit; one-tap credit-or-refund after a cancellation |
 | `/pay/return`, `/pay/mock` | `PaymentPages.tsx` | After PhonePe: polls the server's status check; mock checkout for local testing only |
-| `/privacy`, `/terms` | old `LegalPage` | |
+| `/terms`, `/privacy`, `/guidelines` | `site/LegalPage.tsx` | Translated plain-language summary of what the site does, then IMC's legal text word for word (`content/legal.ts`, English), with section list and search. The privacy text is an unreviewed draft and the refund summary is the site's behaviour: both need IMC's legal sign-off |
 
 `/experiences` and `/community` redirect to `/events` and `/communities` (`?c=` becomes
 `?category=`). Routing is a tiny History-API router in `src/lib/router.tsx`; use `<Link to>` and
@@ -333,4 +333,4 @@ P2 signature features). Update its checklist statuses as work lands. Non-negotia
    domains (`routes: [{ pattern, custom_domain: true }]`), then set `GUIDE_BASE` in `lib/site.ts`.
 5. **Domain cutover:** point `imctirupati.com` and `www` at the Worker, remove the Vercel DNS
    records, and disconnect Vercel (Vercel has no D1, so the community pages only work on the Worker).
-6. Restyle `/privacy` and `/terms`; trim the old `assets/` PNGs and the unused `src/components/`.
+6. Trim the old `assets/` PNGs and the unused `src/components/` (only `Maintenance` is still used).
