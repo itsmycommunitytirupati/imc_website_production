@@ -91,7 +91,8 @@ export default {
       const base = { ok: true, model: env.GUIDE_MODEL || DEFAULT_MODEL, search: env.TAVILY_API_KEY ? "tavily" : "wikipedia", payments: gatewayMode(env) ?? "off" };
       if (new URL(request.url).searchParams.get("check") !== "payments") return json(base);
       if (rateLimited(`${request.headers.get("cf-connecting-ip") ?? "anon"}:paycheck`, 5)) return json({ error: "rate_limited" }, 429);
-      return json({ ...base, phonepe: await checkConnection(env) });
+      const probe = new URL(request.url).searchParams.get("probe");
+      return json({ ...base, phonepe: await checkConnection(env, probe === "sandbox" || probe === "production" ? probe : undefined) });
     }
     try {
       if (pathname.startsWith("/api/admin/")) return await handleAdmin(request, env, pathname);

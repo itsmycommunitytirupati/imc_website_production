@@ -56,8 +56,10 @@ async function call<T>(env: Env, mode: "production" | "sandbox", method: "GET" |
 }
 
 /** Connection check for /api/health?check=payments: can we get a token? Never returns secrets. */
-export async function checkConnection(env: Env): Promise<{ mode: string | null; ok: boolean; error?: string }> {
-  const mode = gatewayMode(env);
+export async function checkConnection(env: Env, probe?: "sandbox" | "production"): Promise<{ mode: string | null; ok: boolean; error?: string }> {
+  // `probe` tries the same credentials against the other environment, to tell test keys from live
+  // ones. It only asks for a token; no order is created.
+  const mode = probe && gatewayMode(env) ? probe : gatewayMode(env);
   if (mode !== "production" && mode !== "sandbox") return { mode, ok: mode === "mock" };
   try {
     await accessToken(env, mode);
