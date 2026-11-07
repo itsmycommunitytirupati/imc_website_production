@@ -109,7 +109,7 @@ export default function EventPage({ slug }: { slug: string }) {
             <Closed icon={<XCircle className="h-8 w-8 text-red-600" />} title={t("This event is cancelled")} text={t("Sorry about that. Here are other things happening soon.")} cta={t("See other events")} />
           ) : past ? (
             <Closed icon={<Hourglass className="h-8 w-8 text-muted" />} title={t("This event has ended")} text={t("RSVPs are closed. Catch the next one.")} cta={t("See upcoming events")} />
-          ) : config?.payments && e.price_inr > 0 && e.seats_left !== 0 ? (
+          ) : config?.payments && e.price_inr > 0 && e.is_sample !== 1 && e.seats_left !== 0 ? (
             <PayForm e={e} />
           ) : (
             <RsvpForm e={e} />

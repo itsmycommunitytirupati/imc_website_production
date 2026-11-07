@@ -11,6 +11,7 @@ import { withShareMeta } from "./meta";
 import { serveMedia } from "./media";
 import { handlePayments, reconcileAll } from "./payments";
 import { rollSamples } from "./samples";
+import { checkConnection, gatewayMode } from "./phonepe";
 import { handleAuth } from "./auth";
 
 const LANGS = new Set(["en", "te", "ta", "hi"]);
@@ -86,7 +87,12 @@ export default {
     const { pathname } = new URL(request.url);
     if (pathname === "/api/guide") return handleGuide(request, env, ctx);
     if (pathname.startsWith("/media/")) return serveMedia(request, env, ctx, pathname.slice(7));
-    if (pathname === "/api/health") return json({ ok: true, model: env.GUIDE_MODEL || DEFAULT_MODEL, search: env.TAVILY_API_KEY ? "tavily" : "wikipedia" });
+    if (pathname === "/api/health") {
+      const base = { ok: true, model: env.GUIDE_MODEL || DEFAULT_MODEL, search: env.TAVILY_API_KEY ? "tavily" : "wikipedia", payments: gatewayMode(env) ?? "off" };
+      if (new URL(request.url).searchParams.get("check") !== "payments") return json(base);
+      if (rateLimited(`${request.headers.get("cf-connecting-ip") ?? "anon"}:paycheck`, 5)) return json({ error: "rate_limited" }, 429);
+      return json({ ...base, phonepe: await checkConnection(env) });
+    }
     try {
       if (pathname.startsWith("/api/admin/")) return await handleAdmin(request, env, pathname);
       if (pathname.startsWith("/api/auth/")) return (await handleAuth(request, env, pathname)) ?? json({ error: "not_found" }, 404);

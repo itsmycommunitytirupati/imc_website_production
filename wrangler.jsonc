@@ -30,8 +30,10 @@
     // PhonePe: "production" or "sandbox" once PHONEPE_CLIENT_ID is filled and the secret is set
     // (npx wrangler secret put PHONEPE_CLIENT_SECRET). Empty = paid events take RSVPs, pay at venue.
     // Sandbox accepts test payments, so never leave it on "sandbox" for the public site.
-    "PHONEPE_ENV": "",
-    "PHONEPE_CLIENT_ID": "",
+    // Live credentials: payments switch on only once the PHONEPE_CLIENT_SECRET secret exists.
+    // Sample events (is_sample = 1) never take payment.
+    "PHONEPE_ENV": "production",
+    "PHONEPE_CLIENT_ID": "M23JWTO00A1DY_2611071441",
     "PHONEPE_CLIENT_VERSION": "1",
     // Webhook Basic credentials set in PhonePe's dashboard; the password is a secret (PHONEPE_WEBHOOK_PASSWORD).
     "PHONEPE_WEBHOOK_USERNAME": "",

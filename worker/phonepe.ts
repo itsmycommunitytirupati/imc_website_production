@@ -55,6 +55,18 @@ async function call<T>(env: Env, mode: "production" | "sandbox", method: "GET" |
   return { ok: res.ok, status: res.status, data: (await res.json().catch(() => ({}))) as T };
 }
 
+/** Connection check for /api/health?check=payments: can we get a token? Never returns secrets. */
+export async function checkConnection(env: Env): Promise<{ mode: string | null; ok: boolean; error?: string }> {
+  const mode = gatewayMode(env);
+  if (mode !== "production" && mode !== "sandbox") return { mode, ok: mode === "mock" };
+  try {
+    await accessToken(env, mode);
+    return { mode, ok: true };
+  } catch (err) {
+    return { mode, ok: false, error: err instanceof Error ? err.message : "unknown" };
+  }
+}
+
 /** Creates a checkout order; returns the PhonePe page to send the person to. */
 export async function createOrder(env: Env, o: { merchantOrderId: string; amountPaise: number; redirectUrl: string; expireAfter: number; event: string; ref: string }) {
   const mode = gatewayMode(env);

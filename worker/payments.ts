@@ -222,7 +222,7 @@ export async function handlePayments(request: Request, env: Env, path: string): 
     if (!PHONE.test(phone)) fields.phone = "Enter a 10-digit mobile number.";
     if (Object.keys(fields).length) return json({ error: "invalid", fields }, 422);
 
-    const event = await env.DB.prepare("SELECT id, title, slug, status, start_at, capacity, price_inr, published FROM events WHERE slug = ?").bind(str(body.slug, 80)).first<{
+    const event = await env.DB.prepare("SELECT id, title, slug, status, start_at, capacity, price_inr, published, is_sample FROM events WHERE slug = ?").bind(str(body.slug, 80)).first<{
       id: number;
       title: string;
       slug: string;
@@ -231,11 +231,14 @@ export async function handlePayments(request: Request, env: Env, path: string): 
       capacity: number;
       price_inr: number;
       published: number;
+      is_sample: number;
     }>();
     if (!event || !event.published) return json({ error: "not_found" }, 404);
     if (event.status === "cancelled") return json({ error: "cancelled" }, 410);
     if (event.start_at < nowLocal()) return json({ error: "past" }, 410);
     if (!(event.price_inr > 0)) return json({ error: "free_event" }, 400);
+    // Sample listings are fictitious: they never take real money, even with live payments on.
+    if (event.is_sample === 1) return json({ error: "sample_event" }, 400);
 
     // Same email already booked: show the existing booking instead of charging twice.
     const existing = await env.DB.prepare("SELECT ref FROM rsvps WHERE event_id = ? AND email = ? AND status = 'confirmed'").bind(event.id, email).first<{ ref: string }>();
